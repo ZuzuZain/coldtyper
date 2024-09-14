@@ -69,4 +69,3 @@ This document is a work in progress.
    - Visual indication of "fire" or "heat" appears as typing speed increases
    - Bonus heat effect for correctly typing consecutive words
    - Progressive visual transition from "cold" to "hot" based on typing performance
-# coldtyper
