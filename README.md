@@ -1,6 +1,3 @@
-Zain Qureshi 
-09-14-2024
-
 *This document is a work in progress.
 
 # coldtyper: A touch-typing practice webapp
