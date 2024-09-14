@@ -1,7 +1,15 @@
+Zain Qureshi 
+09-14-2024
+
+*This document is a work in progress.
+
 # coldtyper: A touch-typing practice webapp
 
 ## Overview
-coldtyper is a web application that helps users practice touch-typing by tracking words per minute (wpm) during timed rounds of 30 or 60 seconds.
+coldtyper is a web application that helps users practice touch-typing by tracking words per minute (wpm) during timed rounds of 30 or 60 seconds. WPM is displayed after the round is over.
+
+
+This document is a work in progress.
 
 ## Core Features
 1. User Interface
@@ -18,13 +26,13 @@ coldtyper is a web application that helps users practice touch-typing by trackin
    - wpm report displayed after each round
    - option to restart or choose a new round length
 
-## Additional Features (if in scope)
+## SCOPE CHECK
 1. User Accounts
    - allow users to log in and view their highest wpm for both 30 and 60-second modes
    - display career wpm average on the user's profile page
    - show user's average wpm for the last n rounds (number to be determined)
 
-## Technical Requirements
+## Requirements
 1. Word Generation
    - algorithm to generate sentences or paragraphs
 
