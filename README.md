@@ -61,3 +61,4 @@ coldtyper is a web application that helps users practice touch-typing by trackin
    - Visual indication of "fire" or "heat" appears as typing speed increases
    - Bonus heat effect for correctly typing consecutive words
    - Progressive visual transition from "cold" to "hot" based on typing performance
+# coldtyper
