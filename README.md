@@ -1,4 +1,4 @@
-*This document is a work in progress.
+
 
 # coldtyper: A touch-typing practice webapp
 
@@ -6,7 +6,7 @@
 coldtyper is a web application that helps users practice touch-typing by tracking words per minute (wpm) during timed rounds of 30 or 60 seconds. WPM is displayed after the round is over.
 
 
-This document is a work in progress.
+*This document is a work in progress.
 
 ## Core Features
 1. User Interface
@@ -66,3 +66,8 @@ This document is a work in progress.
    - Visual indication of "fire" or "heat" appears as typing speed increases
    - Bonus heat effect for correctly typing consecutive words
    - Progressive visual transition from "cold" to "hot" based on typing performance
+
+   - A mode where words begin to freeze from left to right, rushing the user to complete words quickly to avoid being frozen to death. 
+
+2. Executable
+   - Possibly create a lightweight executable software that is mainly an overlay, allowing user to type at any time quickly
