@@ -1,52 +1,92 @@
-# define the URL routes and 
-# the view functions that handle requests to these routes
+"""
+This file contains the main routes for our application.
 
-from flask import request, jsonify
-from app import app, db
-from app.models import User
-import jwt #JSON Web Token generation and verification
+MAIN COMPONENTS:
+- Flask Blueprint for organizing routes
+- JWT (JSON Web Tokens) for user authentication
+- SQLAlchemy for database operations
+"""
+
+from flask import Blueprint, request, jsonify, current_app
+from app import db, bcrypt
+from app.models import User, TestResult
+import jwt
 from datetime import datetime, timedelta
+from functools import wraps
 
-# USER REGISTRATION - expects JSON data with 'username' and 'password'
-app.route('/register', methods=['POST'])
+# Blueprint helps organize our routes
+main = Blueprint("main", __name__)
+
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get("Authorization")
+        if not token:
+            return jsonify({"message": "token is missing"}), 401
+        try:
+            data = jwt.decode(
+                token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
+            )
+            current_user = User.query.get(data["user_id"])
+        except:
+            return jsonify({"message": "token is invalid"}), 401
+        return f(current_user, *args, **kwargs)
+
+    return decorated
+
+
+@main.route("/register", methods=["POST"])
 def register():
     data = request.get_json()
-    username = data['username']
-    password = data['password']
+    username = data["username"]
+    password = data["password"]
+    # check if username already exists
+    if User.query.filter_by(username=username).first():
+        return jsonify({"message": "uh oh :o that username already exists"}), 400
 
-if User.query.filter_by(username=username).first():
-        return jsonify({'message': 'Username already exists'}), 400
-    
     new_user = User(username=username)
     new_user.set_password(password)
     db.session.add(new_user)
     db.session.commit()
-    
-    return jsonify({'message': 'User created successfully'}), 201
 
-# USER LOGIN - handles POST registration requests to /login
-@app.route('/login', methods=['POST'])
+    return jsonify({"message": "user created successfully"}), 201
+
+
+# route for user login
+@main.route("/login", methods=["POST"])
 def login():
+    # get JSON data from the request
     data = request.get_json()
-    user = User.query.filter_by(username=data['username']).first()
-    if user and user.check_password(data['password']):
-        token = jwt.encode({
-            'user_id': user.id,
-            'exp': datetime.utcnow() + timedelta(hours=24)
-        }, app.config['SECRET_KEY'])
-        return jsonify({'token': token})
-    return jsonify({'message': 'Invalid username or password'}), 401
+    # check if user exists and verify password entered
+    user = User.query.filter_by(username=data["username"]).first()
 
-# PROTECTED ROUTE
-@app.route('/protected')
-def protected():
-    token = request.headers.get('Authorization')
-    if not token:
-        return jsonify({'message': 'Token is missing'}), 401
-    try:
-        data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
-        current_user = User.query.get(data['user_id'])
-        return jsonify({'message': f'Hello, {current_user.username}!'}), 200
-    except:
-        return jsonify({'message': 'Token is invalid'}), 401
+    if user and user.check_password(data["password"]):
+        # create JWT token if login was successful
+        token = jwt.encode(
+            {"user_id": user.id, "exp": datetime.utcnow() + timedelta(hours=24)},
+            current_app.config["SECRET_KEY"],
+        )
+        return jsonify({"token": token})
+        return jsonify({"message": "invalid username or password"}), 401
 
+
+@main.route("/protected")
+@token_required
+def protected(current_user):
+    return jsonify({"message": f"you look cool, {current_user.username}!"}), 200
+
+
+@main.route("/submit_test", methods=["POST"])
+@token_required
+def submit_test(current_user):
+    data = request.get_json()
+    new_result = TestResult(
+        user_id=current_user.id,
+        wpm=data["wpm"],
+        accuracy=data["accuracy"],
+        text_length=data["round_length"],
+    )
+    db.session.add(new_result)
+    db.session.commit()
+    return jsonify({"message": "test result submitted successfully"}), 201
