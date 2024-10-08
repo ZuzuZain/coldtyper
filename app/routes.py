@@ -14,7 +14,7 @@ import jwt
 from datetime import datetime, timedelta
 from functools import wraps
 
-# Blueprint helps organize our routes
+# this is the base of the routes - helps organize routes
 main = Blueprint("main", __name__)
 
 
@@ -53,7 +53,6 @@ def register():
     return jsonify({"message": "user created successfully"}), 201
 
 
-# route for user login
 @main.route("/login", methods=["POST"])
 def login():
     # get JSON data from the request
@@ -62,7 +61,6 @@ def login():
     user = User.query.filter_by(username=data["username"]).first()
 
     if user and user.check_password(data["password"]):
-        # create JWT token if login was successful
         token = jwt.encode(
             {"user_id": user.id, "exp": datetime.utcnow() + timedelta(hours=24)},
             current_app.config["SECRET_KEY"],
@@ -79,13 +77,13 @@ def protected(current_user):
 
 @main.route("/submit_test", methods=["POST"])
 @token_required
-def submit_test(current_user):
+def results(current_user):
     data = request.get_json()
-    new_result = TestResult(
+    new_result = results(
         user_id=current_user.id,
         wpm=data["wpm"],
         accuracy=data["accuracy"],
-        text_length=data["round_length"],
+        round_length=data["round_length"],
     )
     db.session.add(new_result)
     db.session.commit()

@@ -1,20 +1,24 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from config import config
 from flask_bcrypt import Bcrypt
-from flask_cors import CORS  # allows Cross-Origin Resourse Sharing
-from config import config
+from flask_cors import CORS
 from flask_migrate import Migrate
+from dotenv import load_dotenv
+import os
 
-db = SQLAlchemy()  # allows access and management of the SQL db in Python
+load_dotenv()
+
+db = SQLAlchemy()
 migrate = Migrate()
-bcrypt = Bcrypt()  # password hashing
+bcrypt = Bcrypt()
 
 
-def create_app(config_name="default"):
+def create_app(config_name=None):
     app = Flask(__name__, static_folder="static/react_build", static_url_path="/")
-    app.config.from_object(config[config_name])
-    config[config_name].init_app(app)
+
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     db.init_app(app)
     migrate.init_app(app, db)

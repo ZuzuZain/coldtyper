@@ -1,27 +1,15 @@
-""" 
-SKELETON to manage settings across all environments
-"""
-
 import os
 from dotenv import load_dotenv
 
 load_dotenv()  # load environment variables from .env file
 
 
-# we should move the secret key in the .env file (i believe) for security
+# secret_key and database_url are in .env (in project root)
 class Config:
-    SECRET_KEY = (
-        os.environ.get(  # generated using 'openssl rand -base64 64'
-            "c8TgJvWNQREt18pdzCM5deGFYfUCW8A4pX34pn8/RqPY"
-            "pT4xn64AlgOYXsAXrhAopuCpURgoQ3qO63iBmUZ80Q=="
-        )
-        or "you-will-never-guess"
-    )
+    SECRET_KEY = os.environ.get() or "HUHH"
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = (
-        os.environ.get("DATABASE_URL") or "postgresql://zuzu@localhost/coldtyper"
-    )
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or "HUHH???"
 
     @staticmethod
     def init_app(app):
@@ -34,21 +22,16 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = (
-        os.environ.get("TEST_DATABASE_URL")
-        or "postgresql://zuzu@localhost/coldtyper_test"
-    )
+    SQLALCHEMY_DATABASE_URI = os.environ.get("TEST_DATABASE_URL")
 
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = (
-        os.environ.get("DATABASE_URL") or "postgresql://zuzu@localhost/coldtyper"
-    )
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
 
 
 config = {
     "development": DevelopmentConfig,
     "testing": TestingConfig,
     "production": ProductionConfig,
-    "default": DevelopmentConfig,
+    "dev": DevelopmentConfig,
 }
