@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify, current_app
 from app import db, bcrypt
-from app.models import User, TestResult
+from app.models import User, TestResult  # possibly add GeneratedWords from models.py
 import jwt
 from datetime import datetime, timedelta
 from functools import wraps
-from app.schemas import UserSchema
+from app.schemas import UserSchema, TokenSchema, TestResultSchema
 from marshmallow import ValidationError
 
 
@@ -26,6 +26,7 @@ def token_required(func):
                 token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
             )
             current_user = User.query.get(data["user_id"])
+
             if not current_user:
                 return jsonify({"message": "user not found"}), 401
         except jwt.ExpiredSignatureError:
@@ -44,6 +45,7 @@ def token_required(func):
 def register():
     user_schema = UserSchema()
     try:
+        # validate & deserialize
         data = user_schema.load(request.json)
     except ValidationError as err:
         return jsonify(err.messages), 400
@@ -54,6 +56,7 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
+    # serialize and return
     return jsonify(user_schema.dump(new_user)), 201
 
 
@@ -63,7 +66,7 @@ def login():
     token_schema = TokenSchema()
 
     try:
-        # deserialize input
+        # validate & deserialize input
         data = user_schema.load(request.json)
     except ValidationError as err:
         return jsonify(err.messages), 400
@@ -79,7 +82,7 @@ def login():
             algorithm="HS256",
         )
 
-        # serialize and return token
+        # serialize & return token
         return (
             jsonify(token_schema.dump({"token": token, "expires_at": expiration})),
             200,
@@ -96,14 +99,26 @@ def protected():
 
 @main.route("/submit_test", methods=["POST"])
 @token_required
-def results(current_user):
-    data = request.get_json()
-    new_result = results(
-        user_id=current_user.id,
+def submit_test(current_user):
+    test_result_schema = TestResultSchema()
+
+    try:
+        # validate and deserialize input
+        data = test_result_schema.load(request.json)
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+
+    # create new test result
+    new_result = TestResult(
+        user_id=request.current_user.id,
         wpm=data["wpm"],
         accuracy=data["accuracy"],
         round_length=data["round_length"],
     )
+
+    # add to db
     db.session.add(new_result)
     db.session.commit()
-    return jsonify({"message": "test result submitted"}), 201
+
+    # return created test result (serialize)
+    return jsonify(test_result_schema.dump(new_result)), 201
