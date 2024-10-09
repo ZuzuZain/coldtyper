@@ -1,6 +1,6 @@
 """ 
-Contains models that represent the structure of the DB table
-  - db.Model 
+Contains models that represent the structure of the DB.
+We are able to create columns and set their attributes 
 """
 
 from app import db, bcrypt

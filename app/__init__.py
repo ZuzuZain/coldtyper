@@ -13,21 +13,21 @@ migrate = Migrate()
 bcrypt = Bcrypt()
 
 
-# need to add correct static folder
 def create_app(config_name=None):
-    app = Flask(__name__)
-
+    app = Flask(__name__) # need static path here
+    
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
+    
+    # init Flask extensions
     db.init_app(app)
     migrate.init_app(app, db)
     bcrypt.init_app(app)
     CORS(app)
 
+    # register Blueprint after configuration is complete
     from app.routes import main as main_blueprint
-
     app.register_blueprint(main_blueprint)
 
-    return app
+    return app #return configured app

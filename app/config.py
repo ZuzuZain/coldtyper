@@ -1,3 +1,8 @@
+''' 
+this file holds out configuration variables
+for the three different environments
+'''
+
 import os
 from dotenv import load_dotenv
 
@@ -10,11 +15,6 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
-
-    @staticmethod
-    def init_app(app):
-        pass
-
 
 class DevelopmentConfig(Config):
     DEBUG = True
@@ -33,5 +33,4 @@ config = {
     "development": DevelopmentConfig,
     "testing": TestingConfig,
     "production": ProductionConfig,
-    "dev": DevelopmentConfig,
 }

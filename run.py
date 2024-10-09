@@ -1,3 +1,8 @@
+'''
+run.py will start the app
+use `python run.py` to launch the Flask dev server
+'''
+
 from app import create_app, db
 from app.models import User, TestResult
 
