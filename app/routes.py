@@ -45,7 +45,7 @@ def token_required(func):
 def register():
     user_schema = UserSchema()
     try:
-        # validate & deserialize
+        # validate & deserialize (load)
         data = user_schema.load(request.json)
     except ValidationError as err:
         return jsonify(err.messages), 400
@@ -56,7 +56,7 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
-    # serialize and return
+    # serialize and return (dump)
     return jsonify(user_schema.dump(new_user)), 201
 
 
@@ -66,12 +66,11 @@ def login():
     token_schema = TokenSchema()
 
     try:
-        # validate & deserialize input
+        # validate & deserialize "username" and "password" 
         data = user_schema.load(request.json)
     except ValidationError as err:
         return jsonify(err.messages), 400
 
-    # user exists ? validate password
     user = User.query.filter_by(username=data["username"]).first()
 
     if user and user.check_password(data["password"]):

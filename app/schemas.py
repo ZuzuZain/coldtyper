@@ -17,7 +17,7 @@ class UserSchema(Schema):
     @validates("username")
     def validate_username(self, value):
         if User.query.filter_by(username=value).first():
-            raise ValidationError("Username already exists")
+            raise ValidationError("username already exists")
 
     class Meta:
         strict = True
