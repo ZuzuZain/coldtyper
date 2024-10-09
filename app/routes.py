@@ -1,12 +1,3 @@
-"""
-This file contains the main routes for our application.
-
-MAIN COMPONENTS:
-- Flask Blueprint for organizing routes
-- JWT (JSON Web Tokens) for user authentication
-- SQLAlchemy for database operations
-"""
-
 from flask import Blueprint, request, jsonify, current_app
 from app import db, bcrypt
 from app.models import User, TestResult
@@ -14,7 +5,6 @@ import jwt
 from datetime import datetime, timedelta
 from functools import wraps
 
-# this is the base of the routes - helps organize routes
 main = Blueprint("main", __name__)
 
 

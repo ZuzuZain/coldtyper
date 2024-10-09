@@ -13,8 +13,9 @@ migrate = Migrate()
 bcrypt = Bcrypt()
 
 
+# need to add correct static folder
 def create_app(config_name=None):
-    app = Flask(__name__, static_folder="static/react_build", static_url_path="/")
+    app = Flask(__name__)
 
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")

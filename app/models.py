@@ -1,27 +1,10 @@
 """ 
-Contains models that represent the structure of the DB Table and
-give an interface to work with the data
-
-DATABASE:
-- import db is an SQLAlchemy instance to do database operations
-
-PASSWORD HASHING ALGORITHMS:
-- bcrypt (current in this file): computationally expensive
-- Argon2: newest and designed to be memory-hard
-- Scrypt: computationally expensive, normally used with other algorithms  
+Contains models that represent the structure of the DB table
+  - db.Model 
 """
 
 from app import db, bcrypt
 from datetime import datetime
-
-"""
-USER MODEL: 
-   - id: will be our way of uniquely identify users
-   - password_hash: stores the HASHED password into our db
-   - tests: works with TestResult model and gives us access to user's results
-   - set_password: hashes password then stores it
-   - check_password: verifies if entered password matches stored hashed password  
-"""
 
 
 class User(db.Model):
@@ -36,13 +19,6 @@ class User(db.Model):
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
-
-
-"""
-RESULTS OF TYPING TEST: 
-- db.Model represents this class as a table in our db
-- db.Column() let's SQLAlchemy know how to create and/or interact with 
-"""
 
 
 class TestResult(db.Model):

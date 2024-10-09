@@ -6,10 +6,10 @@ load_dotenv()  # load environment variables from .env file
 
 # secret_key and database_url are in .env (in project root)
 class Config:
-    SECRET_KEY = os.environ.get() or "HUHH"
+    SECRET_KEY = os.environ.get("SECRET_KEY")
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or "HUHH???"
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
 
     @staticmethod
     def init_app(app):
