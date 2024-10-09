@@ -59,18 +59,33 @@ def register():
 
 @main.route("/login", methods=["POST"])
 def login():
-    # get JSON data from the request
-    data = request.get_json()
-    # check if user exists and verify password entered
+    user_schema = UserSchema(only=("username", "password"))
+    token_schema = TokenSchema()
+
+    try:
+        # deserialize input
+        data = user_schema.load(request.json)
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+
+    # user exists ? validate password
     user = User.query.filter_by(username=data["username"]).first()
 
     if user and user.check_password(data["password"]):
+        expiration = datetime.utcnow() + timedelta(hours=24)
         token = jwt.encode(
-            {"user_id": user.id, "exp": datetime.utcnow() + timedelta(hours=24)},
+            {"user_id": user.id, "exp": expiration},
             current_app.config["SECRET_KEY"],
+            algorithm="HS256",
         )
-        return jsonify({"token": token})
-        return jsonify({"message": "invalid username or password"}), 401
+
+        # serialize and return token
+        return (
+            jsonify(token_schema.dump({"token": token, "expires_at": expiration})),
+            200,
+        )
+
+    return jsonify({"message": "invalid username and/or password"}), 401
 
 
 @main.route("/protected")

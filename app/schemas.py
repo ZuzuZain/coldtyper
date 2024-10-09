@@ -22,3 +22,8 @@ class UserSchema(Schema):
     # catches and displays an error if fields entered were not as expected
     class Meta:
         strict = True
+
+
+class TokenSchema(Schema):
+    token = fields.Str(required=True)
+    expires_at = fields.DateTime(required=True)
