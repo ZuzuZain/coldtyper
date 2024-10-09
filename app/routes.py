@@ -4,43 +4,57 @@ from app.models import User, TestResult
 import jwt
 from datetime import datetime, timedelta
 from functools import wraps
+from app.schemas import UserSchema
+from marshmallow import ValidationError
+
 
 main = Blueprint("main", __name__)
 
 
-def token_required(f):
-    @wraps(f)
+def token_required(func):
+    @wraps(func)
     def decorated(*args, **kwargs):
-        token = request.headers.get("Authorization")
+        token = None
+        if "Authorization" in request.headers:
+            token = request.headers["Authorization"].split(" ")[1]
+
         if not token:
-            return jsonify({"message": "token is missing"}), 401
+            return jsonify({"message": "token missing"}), 401
+
         try:
             data = jwt.decode(
                 token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
             )
             current_user = User.query.get(data["user_id"])
-        except:
-            return jsonify({"message": "token is invalid"}), 401
-        return f(current_user, *args, **kwargs)
+            if not current_user:
+                return jsonify({"message": "user not found"}), 401
+        except jwt.ExpiredSignatureError:
+            return jsonify({"message": "token expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"message": "invalid token"}), 401
+
+        # add user to the request
+        request.current_user = current_user
+        return func(*args, **kwargs)
 
     return decorated
 
 
 @main.route("/register", methods=["POST"])
 def register():
-    data = request.get_json()
-    username = data["username"]
-    password = data["password"]
-    # check if username already exists
-    if User.query.filter_by(username=username).first():
-        return jsonify({"message": "uh oh :o that username already exists"}), 400
+    user_schema = UserSchema()
+    try:
+        data = user_schema.load(request.json)
+    except ValidationError as err:
+        return jsonify(err.messages), 400
 
-    new_user = User(username=username)
-    new_user.set_password(password)
+    new_user = User(username=data["username"])
+    new_user.set_password(data["password"])
+
     db.session.add(new_user)
     db.session.commit()
 
-    return jsonify({"message": "user created successfully"}), 201
+    return jsonify(user_schema.dump(new_user)), 201
 
 
 @main.route("/login", methods=["POST"])
@@ -61,8 +75,8 @@ def login():
 
 @main.route("/protected")
 @token_required
-def protected(current_user):
-    return jsonify({"message": f"you look cool, {current_user.username}!"}), 200
+def protected():
+    return jsonify({"message": f"hi {request.current_user.username}!"}), 200
 
 
 @main.route("/submit_test", methods=["POST"])
@@ -77,4 +91,4 @@ def results(current_user):
     )
     db.session.add(new_result)
     db.session.commit()
-    return jsonify({"message": "test result submitted successfully"}), 201
+    return jsonify({"message": "test result submitted"}), 201

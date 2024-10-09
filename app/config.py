@@ -1,5 +1,5 @@
 """ 
-this file holds out configuration variables
+this file holds our configuration variables
 for the three different environments
 """
 
@@ -30,5 +30,5 @@ config = {
     "development": DevelopmentConfig,
     "testing": TestingConfig,
     "production": ProductionConfig,
-    "default": DevelopmentConfig,
+    "default": DevelopmentConfig,  # this will be used if no config selected
 }
