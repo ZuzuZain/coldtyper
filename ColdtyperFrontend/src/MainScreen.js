@@ -163,3 +163,11 @@ const MainScreen = () => {
 };
 
 export default MainScreen;
+
+//Frontend ToDo
+  //Can do now
+    //1. Add a feature to follow  WPM and accuracy during test
+    //2. Add a feature to display the result after the test
+  //Can partially work on
+    //3. Make a global leaderboard to display the fastest users
+    //4. Add an account screen to see the user's statistics

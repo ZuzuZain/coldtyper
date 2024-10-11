@@ -5,11 +5,40 @@ import { useNavigate } from 'react-router-dom';
 function SignUp() {
   const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  // Function to handle form submission (User signup)
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    alert('Account created successfully!');
-    navigate('/');
+  
+    const userData = {
+      firstName: event.target.firstName.value,
+      lastName: event.target.lastName.value,
+      username: event.target.username.value,
+      email: event.target.email.value,
+      password: event.target.password.value,
+    };
+  
+    // Send a POST request to the backend to create the account
+    try {
+      const response = await fetch('http://localhost:5000/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+  
+      if (response.ok) {
+        alert('Account created successfully!');
+        navigate('/'); // Take the user back to the login page
+      } else {
+        alert('Failed to create account');
+      }
+    } catch (error) {
+      console.error('Error during signup:', error);
+      alert('Error creating account');
+    }
   };
+  
 
   return (
     <div className="signup-container">
