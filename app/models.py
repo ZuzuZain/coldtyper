@@ -11,6 +11,7 @@ from datetime import datetime
 
 
 class User(db.Model):
+    __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
@@ -28,8 +29,9 @@ class User(db.Model):
 
 
 class TestResult(db.Model):
+    __tablename__ = "test_results"
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     wpm = db.Column(db.Float, nullable=False)
     accuracy = db.Column(db.Float, nullable=False)
     round_length = db.Column(db.Integer, nullable=False)

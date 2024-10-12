@@ -7,19 +7,20 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_migrate import Migrate
+from config import config
 import os
-from config import Config
 
 
 db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
 
+from config import get_config
 
-def create_app(config_name="development"):
+
+def create_app(config_name="default"):
     app = Flask(__name__)  # need static path here
-
-    app.config.from_object(config[config_name])
+    app.config.from_object(get_config(config_name))
 
     # init Flask extensions
     db.init_app(app)
@@ -32,4 +33,4 @@ def create_app(config_name="development"):
 
     app.register_blueprint(main_blueprint)
 
-    return app  # return the configured app
+    return app  # return the configure app

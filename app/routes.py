@@ -16,7 +16,7 @@ def token_required(func):
     def decorated(*args, **kwargs):
         token = None
         if "Authorization" in request.headers:
-            token = request.headers["Authorization"].split(" ")[1]
+            token = request.headers["Authorization"].split(" ")[1]  # ["bearer","token"]
 
         if not token:
             return jsonify({"message": "token missing"}), 401
@@ -45,18 +45,27 @@ def token_required(func):
 def register():
     user_schema = UserSchema()
     try:
-        # validate & deserialize (load)
+        # validate and deserialize (load)
         data = user_schema.load(request.json)
     except ValidationError as err:
         return jsonify(err.messages), 400
 
+    # check if user already exists
+    if User.query.filter_by(username=data["username"]).first():
+        return jsonify({"message": "username already exists"}), 409
+
+    # create new user
     new_user = User(username=data["username"])
     new_user.set_password(data["password"])
 
-    db.session.add(new_user)
-    db.session.commit()
+    try:  # add to database
+        db.session.add(new_user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"error creating new user: {str(e)}")
+        return jsonify({"message": "an error occurred. Please try again."}), 500
 
-    # serialize and return (dump)
     return jsonify(user_schema.dump(new_user)), 201
 
 
@@ -66,7 +75,7 @@ def login():
     token_schema = TokenSchema()
 
     try:
-        # validate & deserialize "username" and "password" 
+        # validate & deserialize (load)
         data = user_schema.load(request.json)
     except ValidationError as err:
         return jsonify(err.messages), 400
@@ -102,7 +111,7 @@ def submit_test(current_user):
     test_result_schema = TestResultSchema()
 
     try:
-        # validate and deserialize input
+        # validate & deserialize input (load)
         data = test_result_schema.load(request.json)
     except ValidationError as err:
         return jsonify(err.messages), 400
@@ -119,5 +128,27 @@ def submit_test(current_user):
     db.session.add(new_result)
     db.session.commit()
 
-    # return created test result (serialize)
+    # serialize & return token (dump)
     return jsonify(test_result_schema.dump(new_result)), 201
+
+
+@main.route("/view/users")
+def view_users():
+    users = User.query.all()
+    return jsonify([{"id": user.id, "username": user.username} for user in users])
+
+
+@main.route("/view/test_results")
+def view_test_results():
+    results = TestResult.query.all()
+    return jsonify(
+        [
+            {
+                "id": result.id,
+                "user_id": result.user_id,
+                "wpm": result.wpm,
+                "accuracy": result.accuracy,
+            }
+            for result in results
+        ]
+    )
