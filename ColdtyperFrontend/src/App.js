@@ -1,17 +1,36 @@
 // Login/Main page for Coldtyper
 import './App.css';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom'; //Responsible for routing (Or switching from page to page)
+import axios from 'axios';
 import MainScreen from './MainScreen';
 import Header from './Header';
 import SignUp from './SignUp';
+import Statistics from './Statistics';
 
 function App() {
   const navigate = useNavigate(); // Hook for navigation
 
-  const handleLogin = (event) => {
+  const handleLogin = async (event) => {
     event.preventDefault();
-    navigate('/main'); // Redirect to the main screen
-  };
+    
+    const username = event.target.username.value;
+    const password = event.target.password.value;
+
+    try {
+        // Send POST request to backend for login
+        const response = await axios.post('http://localhost:5000/api/login', { username, password });
+        
+        // If login is successful, redirect to main screen
+        if (response.status === 200) {
+            console.log('Login successful:', response.data);
+            navigate('/main'); // Redirect to the main typing test page
+        }
+    } catch (error) {
+        // Handle errors (e.g., wrong password, user not found)
+        console.error('Login failed:', error.response ? error.response.data : error);
+        alert('Login failed: ' + (error.response ? error.response.data.error : 'Unknown error'));
+    }
+};
 
   const handleSignUp = () => {
     navigate('/signup'); // Redirect to the signup screen
@@ -75,6 +94,7 @@ const AppWrapper = () => (
       <Route path="/" element={<App />} /> {/* Login page */}
       <Route path="/main" element={<MainScreen />} /> {/* Typing test page */}
       <Route path="/signup" element={<SignUp />} /> {/* Sign Up page */}
+      <Route path="/statistics" element={<Statistics />} /> {/* Add route for Statistics */}
     </Routes>
   </Router>
 );
