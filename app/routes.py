@@ -4,7 +4,7 @@ from app.models import User, TestResult  # possibly add GeneratedWords from mode
 import jwt
 from datetime import datetime, timedelta
 from functools import wraps
-from app.schemas import UserSchema, TokenSchema, TestResultSchema
+from app.schemas import UserSchema, TokenSchema, TestResultSchema, LoginSchema
 from marshmallow import ValidationError
 
 
@@ -71,12 +71,12 @@ def register():
 
 @main.route("/login", methods=["POST"])
 def login():
-    user_schema = UserSchema(only=("username", "password"))
+    login_schema = LoginSchema()
     token_schema = TokenSchema()
 
     try:
         # validate & deserialize (load)
-        data = user_schema.load(request.json)
+        data = login_schema.load(request.json)
     except ValidationError as err:
         return jsonify(err.messages), 400
 
@@ -98,7 +98,6 @@ def login():
 
     return jsonify({"message": "invalid username and/or password"}), 401
 
-
 @main.route("/protected")
 @token_required
 def protected():
@@ -107,7 +106,7 @@ def protected():
 
 @main.route("/submit_test", methods=["POST"])
 @token_required
-def submit_test(current_user):
+def submit_test():
     test_result_schema = TestResultSchema()
 
     try:

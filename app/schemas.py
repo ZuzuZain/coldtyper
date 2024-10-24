@@ -23,6 +23,14 @@ class UserSchema(Schema):
         strict = True
 
 
+class LoginSchema(Schema):
+    username = fields.Str(required=True)
+    password = fields.Str(required=True, load_only=True)
+
+    class Meta:
+        strict = True
+
+
 class TokenSchema(Schema):
     token = fields.Str(required=True)
     expires_at = fields.DateTime(required=True)
