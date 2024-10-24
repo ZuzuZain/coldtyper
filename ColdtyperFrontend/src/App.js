@@ -1,6 +1,6 @@
-// Login/Main page for Coldtyper
+// Imports necessary components and libraries for the app
 import './App.css';
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom'; //Responsible for routing (Or switching from page to page)
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import MainScreen from './MainScreen';
 import Header from './Header';
@@ -10,6 +10,8 @@ import Statistics from './Statistics';
 function App() {
   const navigate = useNavigate(); // Hook for navigation
 
+
+//Handles Login Functionality
   const handleLogin = async (event) => {
     event.preventDefault();
     
@@ -17,12 +19,15 @@ function App() {
     const password = event.target.password.value;
 
     try {
-        // Send POST request to backend for login
-        const response = await axios.post('http://localhost:5000/api/login', { username, password });
+        // Send POST request to backend for login with credentials
+        const response = await axios.post('http://localhost:5000/api/login', { username, password }, {
+            withCredentials: true, // Include credentials with the request
+        });
         
         // If login is successful, redirect to main screen
         if (response.status === 200) {
             console.log('Login successful:', response.data);
+            localStorage.setItem('userId', response.data.user.id); // Store the user ID in local storage
             navigate('/main'); // Redirect to the main typing test page
         }
     } catch (error) {
@@ -32,10 +37,14 @@ function App() {
     }
 };
 
+
+//Navigates to Signup Page on Signup Button Click
   const handleSignUp = () => {
     navigate('/signup'); // Redirect to the signup screen
   };
 
+
+//HTML for the App
   return (
     <div className="App">
 

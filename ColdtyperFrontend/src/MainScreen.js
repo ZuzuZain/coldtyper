@@ -1,17 +1,20 @@
+//Imports necessary components and libraries for the app
 import React, { useState, useEffect, useRef } from 'react';
 import './MainScreen.css';
 import Header from './Header';
 import { useNavigate } from 'react-router-dom';
 
 const MainScreen = () => {
-  const sentence = "the quick brown fox jumps over the lazy dog and these are other words that I am typing testing this more apple pear run jump test more this your ghost read red for the boat orange java girl type react ball jump run swing castle jon snow wars"; // Sample sentence
+
+  // Sentence that the user will be typing
+  const sentence = "the quick brown fox jumps over the lazy dog and these are other words that I am typing testing this more apple pear run jump test more this your ghost read red for the boat orange java girl type react ball jump run swing castle jon snow wars adventure galaxy whisper breeze horizon mystery cactus thunder eclipse velvet shadow ripple ember harmony twilight forest crystal melody ocean wander breeze summit cascade meadow sapphire storm labyrinth flicker oasis echo phoenix drizzle comet lunar wildfire dusk voyage infinity starlight shimmer"; // Sample sentence
 
   const [userInput, setUserInput] = useState(""); // Stores the user input
-  const [currentIndex, setCurrentIndex] = useState(0); // Tracks the position within the sentence that the user is currently typing
+  const [currentIndex, setCurrentIndex] = useState(0); // Tracks the position within the sentence
 
-  const [testDuration, setTestDuration] = useState(30); // Default test duration is 30 seconds
-  const [timeLeft, setTimeLeft] = useState(null); // Timer state
-  const [testActive, setTestActive] = useState(false); // Is the test active
+  const [testDuration, setTestDuration] = useState(30); // Test duration; default = 30 seconds
+  const [timeLeft, setTimeLeft] = useState(null); // Time remaining in test
+  const [testActive, setTestActive] = useState(false); // Is the test active?
   const [countdown, setCountdown] = useState(3); // Countdown before the test starts
 
   const [wpm, setWpm] = useState(0); // Tracks WPM
@@ -22,21 +25,25 @@ const MainScreen = () => {
   const navigate = useNavigate();
   const inputRef = useRef(null);
 
+
+// Function to start the test
   const startTest = () => {
-    setTestActive(false); // Reset test active state
+
+    // Reset all the state variables
+    setTestActive(false);
     setUserInput("");
     setCurrentIndex(0);
     setCorrectChars(0);
-    setCountdown(3); // Start a 3-second countdown
+    setCountdown(3);
 
     const countdownInterval = setInterval(() => {
       setCountdown((prev) => {
         if (prev === 1) {
           clearInterval(countdownInterval);
-          setTestActive(true); // Start the actual test
+          setTestActive(true);
           setAccuracy(0);
           setWpm(0);
-          setTimeLeft(testDuration); // Set timer based on the selected duration
+          setTimeLeft(testDuration);
           inputRef.current.focus();
         }
         return prev - 1;
@@ -44,6 +51,34 @@ const MainScreen = () => {
     }, 1000);
   };
 
+
+  // Function to send test results to the backend
+const sendTestResults = async () => {
+  try {
+      const response = await fetch('http://localhost:5000/api/updateResults', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          credentials: 'include', // Include session credentials
+          body: JSON.stringify({
+              wpm: wpm, // WPM calculated after test
+              accuracy: accuracy // Accuracy calculated after test
+          }),
+      });
+
+      if (response.ok) {
+          console.log('Results submitted successfully');
+      } else {
+          console.error('Failed to submit results');
+      }
+  } catch (error) {
+      console.error('Error submitting results:', error);
+  }
+};
+
+
+//Timing for the test
   useEffect(() => {
     let timerInterval;
     if (testActive && timeLeft > 0) {
@@ -51,51 +86,56 @@ const MainScreen = () => {
         setTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
     } else if (timeLeft === 0) {
-      setTestActive(false); // Stop the test when the timer hits zero
+      setTestActive(false); // Stop the test when the timer hits zero; then calculate WPM and accuracy
       calculateWpm();
       calculateAccuracy();
+      sendTestResults(); // Send the test results to the backend
     }
     return () => clearInterval(timerInterval);
   }, [testActive, timeLeft]);
 
+
   // Function to handle input changes
-  // Function to handle input changes
-const handleInputChange = (e) => {
-  const value = e.target.value;
-  if (testActive && timeLeft > 0) {
-    const lastChar = value.slice(-1); // Get the last character typed
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    if (testActive && timeLeft > 0) {
+      const lastChar = value.slice(-1); // Get the last character typed
 
-    // Count all valid typed characters excluding backspace and shift
-    if (lastChar !== 'Shift' && lastChar !== 'Backspace') {
-      setAllTypedEntries(allTypedEntries + 1);
-    }
-
-    setUserInput(value);
-    setCurrentIndex(value.length);
-
-    // Count correct characters
-    let correctCharCount = 0;
-    value.split("").forEach((char, index) => {
-      if (char === sentence[index]) {
-        correctCharCount++;
+      // Count all valid typed characters excluding backspace and shift
+      if (lastChar !== 'Shift' && lastChar !== 'Backspace') {
+        setAllTypedEntries(allTypedEntries + 1);
       }
-    });
-    setCorrectChars(correctCharCount);
-  }
-};
 
-// Function to calculate WPM (words per minute)
-const calculateWpm = () => {
-  const wordsPerMinute = (allTypedEntries / 5) / (testDuration / 60); // Adjusted WPM formula
-  setWpm(wordsPerMinute);
-};
+      setUserInput(value);
+      setCurrentIndex(value.length);
 
-// Function to calculate accuracy
-const calculateAccuracy = () => {
-  const accuracyPercentage = (correctChars / allTypedEntries) * 100; // Adjusted accuracy formula
-  setAccuracy(accuracyPercentage.toFixed(2));
-};
+      // Count correct characters
+      let correctCharCount = 0;
+      value.split("").forEach((char, index) => {
+        if (char === sentence[index]) {
+          correctCharCount++;
+        }
+      });
+      setCorrectChars(correctCharCount);
+    }
+  };
 
+
+  // Function to calculate WPM (words per minute)
+  const calculateWpm = () => {
+    const wordsPerMinute = (allTypedEntries / 5) / (testDuration / 60); // Adjusted WPM formula
+    setWpm(wordsPerMinute);
+  };
+
+
+  // Function to calculate accuracy
+  const calculateAccuracy = () => {
+    const accuracyPercentage = (correctChars / allTypedEntries) * 100; // Adjusted accuracy formula
+    setAccuracy(accuracyPercentage.toFixed(2));
+  };
+
+
+// Function to display the sentence with colors based on user input
   const displaySentence = () => {
     const sentenceArray = sentence.split("").map((char, index) => {
       let color;
@@ -115,11 +155,30 @@ const calculateAccuracy = () => {
     sentenceArray.splice(currentIndex, 0, (
       <span key="cursor" style={{ color: 'white', whiteSpace: 'pre' }}>|</span>
     ));
-    return <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'break-word', height:'100%', width:'100%', padding:'15px' }}>{sentenceArray}</div>;
+    return <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'break-word', height:'100%', width:'100%', padding:'15px', fontSize: '25px' }}>{sentenceArray}</div>;
   };
 
-  const handleGoBack = () => {
-    navigate('/'); 
+
+// Function to handle logout
+  const handleGoBack = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/logout', {
+        method: 'POST',
+        credentials: 'include', // Make sure cookies/sessions are included
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (response.ok) {
+        // Redirect to login page on successful logout
+        navigate('/');
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   const handleTestDurationChange = (e) => {
@@ -135,6 +194,8 @@ const calculateAccuracy = () => {
     navigate('/statistics'); // Navigate to the statistics page
   };
 
+
+// HTML for the MainScreen component
   return (
     <div className="MainScreen">
       <Header />
