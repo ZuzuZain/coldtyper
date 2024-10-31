@@ -194,6 +194,10 @@ const sendTestResults = async () => {
     navigate('/statistics'); // Navigate to the statistics page
   };
 
+  const handleMainClick = () => {
+    navigate('/main'); // Navigate to the main page
+  };
+
 
 // HTML for the MainScreen component
   return (
@@ -204,8 +208,8 @@ const sendTestResults = async () => {
         {/* Left sidebar with leaderboard button */}
         <nav className="sidebar">
           
-          <button onClick={handleGoBack} className="sidebar-button">
-            Logout
+          <button onClick={handleMainClick} className="sidebar-button">
+            Main Menu
           </button>
 
           <button onClick={handleLeaderboardClick} className="sidebar-button">
@@ -215,6 +219,11 @@ const sendTestResults = async () => {
           <button onClick={handleStatisticsClick} className="sidebar-button">
             User Statistics
           </button>
+
+          <button onClick={handleGoBack} className="sidebar-button">
+            Logout
+          </button>
+          
         </nav>
 
         <div className="MainScreen-body">

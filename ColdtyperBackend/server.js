@@ -1,39 +1,41 @@
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
 
 const app = express();
 const port = 5000; // This is the port of the local backend server
 
+require('dotenv').config({ path: '../.env' });
+
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:3000', // Adjust this to your frontend URL
+    origin: process.env.DB_URL, // Adjust this to your frontend URL
     methods: ['GET', 'POST', 'OPTIONS'], // Add 'OPTIONS' to the methods
     credentials: true, // Allow credentials (cookies) to be included
 }));
 app.use(express.json()); // For parsing application/json
 
 app.use(session({
-    secret: 'your_secret_key', // Replace with a strong secret key
-    resave: false, // Avoid resaving session data if nothing changed
-    saveUninitialized: false, // Only create session when something is stored
+    secret: process.env.SESSION_SECRET, // Use a random string for the secret
+    resave: false,
+    saveUninitialized: false,
     cookie: {
-      secure: false, // Set to true if using HTTPS (in production)
-      httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
-      maxAge: 1000 * 60 * 60 * 24 // 1 day session expiration
+      secure: false,
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24
     }
-  }));
+}));
 
 
 // PostgreSQL connection
 const pool = new Pool({
-    user: 'postgres', // Default local PostgreSQL username
-    host: 'localhost',
-    database: 'coldtyper_db', // DB name
-    password: 'REDACTED', // DB password
-    port: 5432, // Default PostgreSQL port
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
 });
 
 
@@ -168,6 +170,22 @@ app.post('/api/updateResults', async (req, res) => {
     } catch (error) {
         console.error('Error updating statistics:', error);
         res.status(500).json({ error: 'Failed to update statistics' });
+    }
+});
+
+
+app.get('/api/leaderboard', async (req, res) => {
+    try {
+        const leaderboard = await pool.query(`
+            SELECT username, fastest_wpm, highest_accuracy, total_tests
+            FROM user_statistics
+            JOIN users ON user_statistics.id = users.id
+            ORDER BY fastest_wpm DESC;
+        `);
+        res.status(200).json(leaderboard.rows);
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        res.status(500).json({ error: 'Failed to retrieve leaderboard' });
     }
 });
 

@@ -6,6 +6,7 @@ import MainScreen from './MainScreen';
 import Header from './Header';
 import SignUp from './SignUp';
 import Statistics from './Statistics';
+import Leaderboard from './Leaderboard';
 
 function App() {
   const navigate = useNavigate(); // Hook for navigation
@@ -104,6 +105,7 @@ const AppWrapper = () => (
       <Route path="/main" element={<MainScreen />} /> {/* Typing test page */}
       <Route path="/signup" element={<SignUp />} /> {/* Sign Up page */}
       <Route path="/statistics" element={<Statistics />} /> {/* Add route for Statistics */}
+      <Route path="/leaderboard" element={<Leaderboard />} />
     </Routes>
   </Router>
 );
