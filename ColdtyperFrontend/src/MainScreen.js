@@ -43,6 +43,8 @@ const MainScreen = () => {
           setTestActive(true);
           setAccuracy(0);
           setWpm(0);
+          setCorrectChars(0);
+          setAllTypedEntries(0);
           setTimeLeft(testDuration);
           inputRef.current.focus();
         }
@@ -81,18 +83,34 @@ const sendTestResults = async () => {
 //Timing for the test
   useEffect(() => {
     let timerInterval;
+
     if (testActive && timeLeft > 0) {
       timerInterval = setInterval(() => {
         setTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
-    } else if (timeLeft === 0) {
-      setTestActive(false); // Stop the test when the timer hits zero; then calculate WPM and accuracy
+    } else if (timeLeft === 0 && testActive) {
+      setTestActive(false); // Stop the test when the timer hits zero
       calculateWpm();
       calculateAccuracy();
       sendTestResults(); // Send the test results to the backend
     }
+
     return () => clearInterval(timerInterval);
   }, [testActive, timeLeft]);
+
+
+  useEffect(() => {
+
+    const handleEnterPress = (event) => {
+        if (event.key === "Enter") {
+            window.location.reload(); // Refresh the page
+        }
+    };
+    window.addEventListener("keydown", handleEnterPress);
+    return () => {
+        window.removeEventListener("keydown", handleEnterPress);
+    };
+}, []);
 
 
   // Function to handle input changes

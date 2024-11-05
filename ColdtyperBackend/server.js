@@ -90,8 +90,6 @@ app.post('/api/login', async (req, res) => {
 
         // Create a session for the user
         req.session.userId = user.rows[0].id;
-        // Log the userId for testing
-        console.log('User ID stored in session:', req.session.userId);
 
         res.status(200).json({ message: 'Login successful', user: user.rows[0] });
 
@@ -104,7 +102,6 @@ app.post('/api/login', async (req, res) => {
 
 app.get('/api/statistics', async (req, res) => {
     const userId = req.session.userId; // Get user ID from the session
-    console.log('User ID from session:', userId); // Log the userId from session
 
     if (!userId) {
         console.log('Unauthorized access: userId is not set'); // Log if userId is not set
