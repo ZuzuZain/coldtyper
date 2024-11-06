@@ -1,4 +1,4 @@
-//Imports necessary components and libraries for the app
+// Imports necessary components and libraries for the app
 import React, { useState, useEffect, useRef } from 'react';
 import './MainScreen.css';
 import Header from './Header';
@@ -26,10 +26,9 @@ const MainScreen = () => {
   const inputRef = useRef(null);
 
 
-// Function to start the test
+  // Function to start the test
   const startTest = () => {
 
-    // Reset all the state variables
     setTestActive(false);
     setUserInput("");
     setCurrentIndex(0);
@@ -53,34 +52,32 @@ const MainScreen = () => {
     }, 1000);
   };
 
-
   // Function to send test results to the backend
-const sendTestResults = async () => {
-  try {
-      const response = await fetch('http://localhost:5000/api/updateResults', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          credentials: 'include', // Include session credentials
-          body: JSON.stringify({
-              wpm: wpm, // WPM calculated after test
-              accuracy: accuracy // Accuracy calculated after test
-          }),
-      });
+  const sendTestResults = async () => {
+    try {
+        const response = await fetch('http://localhost:5000/api/updateResults', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include', // Include session credentials
+            body: JSON.stringify({
+                wpm: wpm, // WPM calculated after test
+                accuracy: accuracy // Accuracy calculated after test
+            }),
+        });
 
-      if (response.ok) {
-          console.log('Results submitted successfully');
-      } else {
-          console.error('Failed to submit results');
-      }
-  } catch (error) {
-      console.error('Error submitting results:', error);
-  }
+        if (response.ok) {
+            console.log('Results submitted successfully');
+        } else {
+            console.error('Failed to submit results');
+        }
+    } catch (error) {
+        console.error('Error submitting results:', error);
+    }
 };
 
-
-//Timing for the test
+  //Timing for the test
   useEffect(() => {
     let timerInterval;
 
@@ -98,9 +95,8 @@ const sendTestResults = async () => {
     return () => clearInterval(timerInterval);
   }, [testActive, timeLeft]);
 
-
+  // Refresh the page when the user presses Enter for quick restart
   useEffect(() => {
-
     const handleEnterPress = (event) => {
         if (event.key === "Enter") {
             window.location.reload(); // Refresh the page
@@ -110,8 +106,7 @@ const sendTestResults = async () => {
     return () => {
         window.removeEventListener("keydown", handleEnterPress);
     };
-}, []);
-
+  }, []);
 
   // Function to handle input changes
   const handleInputChange = (e) => {
@@ -119,7 +114,7 @@ const sendTestResults = async () => {
     if (testActive && timeLeft > 0) {
       const lastChar = value.slice(-1); // Get the last character typed
 
-      // Count all valid typed characters excluding backspace and shift
+      // Count all valid typed characters, not including backspace and shift
       if (lastChar !== 'Shift' && lastChar !== 'Backspace') {
         setAllTypedEntries(allTypedEntries + 1);
       }
@@ -138,44 +133,62 @@ const sendTestResults = async () => {
     }
   };
 
-
-  // Function to calculate WPM (words per minute)
+  // Calculates the WPM with an adjusted formula (Divide by 5 because average word length is 5 characters)
   const calculateWpm = () => {
     const wordsPerMinute = (allTypedEntries / 5) / (testDuration / 60); // Adjusted WPM formula
     setWpm(wordsPerMinute);
   };
 
-
-  // Function to calculate accuracy
+  // Calculates the user's accuracy
   const calculateAccuracy = () => {
     const accuracyPercentage = (correctChars / allTypedEntries) * 100; // Adjusted accuracy formula
     setAccuracy(accuracyPercentage.toFixed(2));
   };
 
-
-// Function to display the sentence with colors based on user input
+  // Function to display the sentence with colors based on user input
   const displaySentence = () => {
-    const sentenceArray = sentence.split("").map((char, index) => {
-      let color;
-      if (index < currentIndex) {
-        if (char === userInput[index]) {
-          color = '#00E6F6'; // Blue color for correct characters
-        } else {
-          color = 'red'; // Red color for incorrect characters
-        }
-      }
-      return (
-        <span key={index} style={{ color: color, whiteSpace: 'pre' }}>
-          {char}
-        </span>
-      );
-    });
-    sentenceArray.splice(currentIndex, 0, (
-      <span key="cursor" style={{ color: 'white', whiteSpace: 'pre' }}>|</span>
-    ));
-    return <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'break-word', height:'100%', width:'100%', padding:'15px', fontSize: '25px' }}>{sentenceArray}</div>;
-  };
+    let absoluteIndex = 0; // Track index across entire sentence
 
+    // Map over words and create spans for each word
+    const wordsArray = sentence.split(" ").map((word, wordIndex) => {
+        const wordCharacters = word.split("").map((char, charIndex) => {
+            // Determine the color based on correctness
+            let color;
+            if (absoluteIndex < currentIndex) {
+                color = char === userInput[absoluteIndex] ? '#00E6F6' : 'red';
+            }
+
+            const charSpan = (
+                <span key={`${wordIndex}-${charIndex}`} style={{ color: color }}>
+                    {char}
+                </span>
+            );
+            
+            absoluteIndex++; // Increment for each character in word
+            return charSpan;
+        });
+
+        // Add a single space between words
+        const wordWithSpace = (
+            <span key={`word-${wordIndex}`} style={{ display: 'inline-block', marginRight: '4px' }}>
+                {wordCharacters}
+                {wordIndex < sentence.split(" ").length - 1 && (
+                    <span>&nbsp;</span> // Add space only if not last word
+                )}
+            </span>
+        );
+
+        absoluteIndex++;
+        return wordWithSpace;
+  });
+
+  // Return sentence with wrapping and spacing
+  return (
+      <div style={{ whiteSpace: 'normal', overflowWrap: 'break-word', padding: '15px', fontSize: '25px' }}>
+          {wordsArray}
+      </div>
+  );
+};
 
 // Function to handle logout
   const handleGoBack = async () => {
@@ -209,21 +222,19 @@ const sendTestResults = async () => {
   };
 
   const handleStatisticsClick = () => {
-    navigate('/statistics'); // Navigate to the statistics page
+    navigate('/statistics');
   };
 
   const handleMainClick = () => {
-    navigate('/main'); // Navigate to the main page
+    navigate('/main');
   };
 
-
-// HTML for the MainScreen component
+  // Returns the HTML for the MainScreen component
   return (
     <div className="MainScreen">
       <Header />
       <div className="MainScreen-container">
 
-        {/* Left sidebar with leaderboard button */}
         <nav className="sidebar">
           
           <button onClick={handleMainClick} className="sidebar-button">

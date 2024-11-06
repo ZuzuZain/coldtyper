@@ -124,7 +124,6 @@
   color: white;
 }
 
-/* Common styling for sections */
 .login-section, .signup-section {
   margin-bottom: 30px;
 }
@@ -143,7 +142,7 @@ form label {
   margin-bottom: 5px; 
 }
 
-/* Common button CSS for App buttons */
+/* Button CSS */
 .button-49,
 .button-49:after {
   width: 50px;

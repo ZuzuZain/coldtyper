@@ -1,4 +1,4 @@
-// Leaderboard.js
+// Leaderboard.js imports
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import './Leaderboard.css';

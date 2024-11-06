@@ -29,7 +29,6 @@ const Statistics = () => {
           setTotalTests(stats.total_tests || 0);
         } else {
           console.error('Failed to fetch statistics:', await response.json());
-          // Handle error, such as redirecting to login if unauthorized
         }
       } catch (error) {
         console.error('Error fetching user statistics:', error);

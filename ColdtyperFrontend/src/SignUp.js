@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 function SignUp() {
   const navigate = useNavigate();
 
-  // Function to handle form submission (User signup)
+  // Function to handle user signup
   const handleSubmit = async (event) => {
     event.preventDefault();
   

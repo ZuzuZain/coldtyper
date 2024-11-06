@@ -9,10 +9,9 @@ import Statistics from './Statistics';
 import Leaderboard from './Leaderboard';
 
 function App() {
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
-
-//Handles Login Functionality
+  // Handles user login functionality
   const handleLogin = async (event) => {
     event.preventDefault();
     
@@ -22,38 +21,35 @@ function App() {
     try {
         // Send POST request to backend for login with credentials
         const response = await axios.post('http://localhost:5000/api/login', { username, password }, {
-            withCredentials: true, // Include credentials with the request
+            withCredentials: true, //Sends the users cookie with the request
         });
         
         // If login is successful, redirect to main screen
         if (response.status === 200) {
-            console.log('Login successful:', response.data);
             localStorage.setItem('userId', response.data.user.id); // Store the user ID in local storage
-            navigate('/main'); // Redirect to the main typing test page
+            navigate('/main');
         }
     } catch (error) {
-        // Handle errors (e.g., wrong password, user not found)
+        // Catches any potential errors and alerts the user (Wrong password, user not found, etc.)
         console.error('Login failed:', error.response ? error.response.data : error);
         alert('Login failed: ' + (error.response ? error.response.data.error : 'Unknown error'));
     }
 };
 
-
-//Navigates to Signup Page on Signup Button Click
+// Navigates to Signup Page on button press
   const handleSignUp = () => {
-    navigate('/signup'); // Redirect to the signup screen
+    navigate('/signup');
   };
 
-
-//HTML for the App
+// Returns the HTML for the App page
   return (
     <div className="App">
 
-      <Header /> {/* Header component from Header.js/.css */}
+      <Header />
 
       <div className="App-body">
 
-        <div className="App-description"> {/* Left side of body; provides a description for what Coldtyper is */}
+        <div className="App-description">
           <h1>What is Coldtyper?</h1>
           <div className="card">
             <div className="inner-card">Coldtyper is a typing test app that allows users to test their typing speed and accuracy. Once a test begins, the app will keep track of user's time, WPM, and accuracy. Once the test is over, users can view their results.</div>
@@ -69,7 +65,7 @@ function App() {
           </div>
         </div>
 
-        <div className="App-login"> {/* Right side of body; login and signup sections */}
+        <div className="App-login">
           <div className="login-section">
             <h1>Already Have an Account?</h1>
             <h2>Login</h2>
@@ -101,11 +97,11 @@ function App() {
 const AppWrapper = () => (
   <Router>
     <Routes>
-      <Route path="/" element={<App />} /> {/* Login page */}
-      <Route path="/main" element={<MainScreen />} /> {/* Typing test page */}
-      <Route path="/signup" element={<SignUp />} /> {/* Sign Up page */}
-      <Route path="/statistics" element={<Statistics />} /> {/* Add route for Statistics */}
-      <Route path="/leaderboard" element={<Leaderboard />} />
+      <Route path="/" element={<App />} /> {/* App */}
+      <Route path="/main" element={<MainScreen />} /> {/* MainScreen */}
+      <Route path="/signup" element={<SignUp />} /> {/* SignUp */}
+      <Route path="/statistics" element={<Statistics />} /> {/* Statistics */}
+      <Route path="/leaderboard" element={<Leaderboard />} /> {/* Leaderboard */}
     </Routes>
   </Router>
 );

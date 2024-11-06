@@ -11,14 +11,14 @@ require('dotenv').config({ path: '../.env' });
 
 // Middleware
 app.use(cors({
-    origin: process.env.DB_URL, // Adjust this to your frontend URL
-    methods: ['GET', 'POST', 'OPTIONS'], // Add 'OPTIONS' to the methods
-    credentials: true, // Allow credentials (cookies) to be included
+    origin: process.env.DB_URL,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    credentials: true, // Allow cookies to be included
 }));
 app.use(express.json()); // For parsing application/json
 
 app.use(session({
-    secret: process.env.SESSION_SECRET, // Use a random string for the secret
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -28,7 +28,6 @@ app.use(session({
     }
 }));
 
-
 // PostgreSQL connection
 const pool = new Pool({
     user: process.env.DB_USER,
@@ -37,7 +36,6 @@ const pool = new Pool({
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
 });
-
 
 // API endpoint for user signup
 app.post('/api/signup', async (req, res) => {
@@ -65,7 +63,6 @@ app.post('/api/signup', async (req, res) => {
         res.status(500).json({ error: 'Signup failed' });
     }
 });
-
 
 // API endpoint for user login
 app.post('/api/login', async (req, res) => {
@@ -99,7 +96,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-
 app.get('/api/statistics', async (req, res) => {
     const userId = req.session.userId; // Get user ID from the session
 
@@ -130,7 +126,6 @@ app.get('/api/statistics', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch statistics' });
     }
 });
-
 
 // API endpoint to update user's typing test results
 app.post('/api/updateResults', async (req, res) => {
@@ -170,7 +165,6 @@ app.post('/api/updateResults', async (req, res) => {
     }
 });
 
-
 app.get('/api/leaderboard', async (req, res) => {
     try {
         const leaderboard = await pool.query(`
@@ -186,8 +180,6 @@ app.get('/api/leaderboard', async (req, res) => {
     }
 });
 
-
-
 app.post('/api/logout', (req, res) => {
     req.session.destroy(err => {
         if (err) {
@@ -197,9 +189,6 @@ app.post('/api/logout', (req, res) => {
         res.status(200).json({ message: 'Logout successful' });
     });
 });
-
-
-
 
 // Start the server
 app.listen(port, () => {
