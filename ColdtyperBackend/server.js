@@ -19,7 +19,7 @@ app.use(
     session({
         secret: process.env.SESSION_SECRET,
         resave: false,
-        saveUninitialized: false,
+        saveUninitialized: true,
         cookie: {
             httpOnly: true, // for security
             secure: true, // true if using HTTPS in production
@@ -88,6 +88,8 @@ app.post('/api/login', async (req, res) => {
 
         // Create a session for the user
         req.session.userId = user.rows[0].id;
+
+        console.log('Session after login:', req.session); // Debugging session
 
         res.status(200).json({ message: 'Login successful', user: user.rows[0] });
 
