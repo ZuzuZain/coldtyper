@@ -19,9 +19,9 @@ app.use(
     session({
         secret: process.env.SESSION_SECRET,
         resave: false,
-        saveUninitialized: true,
+        saveUninitialized: false,
         cookie: {
-            httpOnly: false, // for security
+            httpOnly: true, // for security
             secure: true, // true if using HTTPS in production
             sameSite: 'None', // important for cross-site cookies
         },
