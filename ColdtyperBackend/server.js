@@ -23,7 +23,6 @@ app.use(
         cookie: {
             httpOnly: true, // for security
             secure: false, // true if using HTTPS in production
-            sameSite: 'None', // important for cross-site cookies
             maxAge: 1000 * 60 * 60 * 24,
         },
     })
