@@ -20,6 +20,7 @@ app.use(express.json()); // For parsing application/json
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
+        proxy: true, // Enable if your app is behind a proxy like Render
         resave: false,
         saveUninitialized: false,
         cookie: {
