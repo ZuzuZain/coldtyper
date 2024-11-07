@@ -22,7 +22,7 @@ app.use(
         saveUninitialized: false,
         cookie: {
             httpOnly: true, // for security
-            secure: process.env.NODE_ENV === 'production', // true if using HTTPS in production
+            secure: false, // true if using HTTPS in production
             sameSite: 'None', // important for cross-site cookies
             maxAge: 1000 * 60 * 60 * 24,
         },
