@@ -18,13 +18,13 @@ app.use(express.json()); // For parsing application/json
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
-        resave: true,
+        resave: false,
         saveUninitialized: false,
         cookie: {
-            httpOnly: false, // for security
-            secure: true, // true if using HTTPS in production
+            httpOnly: true, // for security
+            secure: process.env.NODE_ENV === 'production', // true if using HTTPS in production
             sameSite: 'None', // important for cross-site cookies
-            maxAge: 1000 * 60 * 60 * 24
+            maxAge: 1000 * 60 * 60 * 24,
         },
     })
 );
@@ -88,7 +88,7 @@ app.post('/api/login', async (req, res) => {
         }
 
         // Create a session for the user
-        req.session.userId = user.id;
+        req.session.userId = user.rows[0].id;
 
         console.log('Session after login:', req.session); // Debugging session
 
