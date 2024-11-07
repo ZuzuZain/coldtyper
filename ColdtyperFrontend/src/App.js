@@ -20,7 +20,7 @@ function App() {
 
     try {
         // Send POST request to backend for login with credentials
-        const response = await axios.post('http://localhost:5000/api/login', { username, password }, {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/login`, { username, password }, {
             withCredentials: true, //Sends the users cookie with the request
         });
         

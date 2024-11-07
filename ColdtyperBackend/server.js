@@ -7,11 +7,9 @@ const { Pool } = require('pg');
 const app = express();
 const port = 5000; // This is the port of the local backend server
 
-require('dotenv').config({ path: '../.env' });
-
 // Middleware
 app.use(cors({
-    origin: process.env.DB_URL,
+    origin: `${process.env.FRONTEND_API_URL}`,
     methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true, // Allow cookies to be included
 }));

@@ -14,7 +14,7 @@ const Leaderboard = () => {
     useEffect(() => {
         const fetchLeaderboard = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/leaderboard', {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/api/leaderboard`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include'
@@ -44,7 +44,7 @@ const Leaderboard = () => {
   // Function to handle logout
   const handleGoBack = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/logout', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/logout`, {
         method: 'POST',
         credentials: 'include', // Make sure cookies/sessions are included
         headers: {
