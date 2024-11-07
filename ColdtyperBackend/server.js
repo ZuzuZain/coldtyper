@@ -15,16 +15,19 @@ app.use(cors({
 }));
 app.use(express.json()); // For parsing application/json
 
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: false,
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24
-    }
-}));
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: true,
+        cookie: {
+            httpOnly: false, // for security
+            secure: true, // true if using HTTPS in production
+            sameSite: 'None', // important for cross-site cookies
+        },
+    })
+);
+
 
 // PostgreSQL connection
 const pool = new Pool({
