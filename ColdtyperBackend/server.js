@@ -7,6 +7,8 @@ const { Pool } = require('pg');
 const app = express();
 const port = 5000; // This is the port of the local backend server
 
+app.set('trust proxy', 1);  // Enable if your app is behind a proxy like Render
+
 // Middleware
 app.use(cors({
     origin: `${process.env.FRONTEND_API_URL}`,
@@ -22,7 +24,8 @@ app.use(
         saveUninitialized: false,
         cookie: {
             httpOnly: true, // for security
-            secure: false, // true if using HTTPS in production
+            secure: true, // true if using HTTPS in production
+            sameSite: 'none', // same-site cookies policy
             maxAge: 1000 * 60 * 60 * 24,
         },
     })
