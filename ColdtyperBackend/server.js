@@ -18,7 +18,7 @@ app.use(express.json()); // For parsing application/json
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
-        resave: false,
+        resave: true,
         saveUninitialized: false,
         cookie: {
             httpOnly: false, // for security
@@ -88,7 +88,7 @@ app.post('/api/login', async (req, res) => {
         }
 
         // Create a session for the user
-        req.session.userId = user.rows[0].id;
+        req.session.userId = user.id;
 
         console.log('Session after login:', req.session); // Debugging session
 
