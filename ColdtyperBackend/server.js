@@ -94,6 +94,8 @@ app.post('/api/login', async (req, res) => {
 
         console.log('Session after login:', req.session); // Debugging session
 
+        req.session.save(); // Save the session to the store
+
         res.status(200).json({ message: 'Login successful', user: user.rows[0] });
 
     } catch (error) {
