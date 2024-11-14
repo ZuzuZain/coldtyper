@@ -19,16 +19,28 @@ from config import get_config
 
 
 def create_app(config_name="default"):
-    app = Flask(__name__)  # need static path here
+    app = Flask(__name__)
     app.config.from_object(get_config(config_name))
 
-    # init Flask extensions
+    # configure CORS
+    CORS(
+        app,
+        resources={
+            r"/*": {  # Apply to all routes
+                "origins": ["http://localhost:3000"],
+                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                "allow_headers": ["Content-Type", "Authorization", "Accept"],
+                "supports_credentials": True,
+            }
+        },
+        expose_headers=["Content-Range", "X-Content-Range"],
+    )
+    # init extensions
     db.init_app(app)
     migrate.init_app(app, db)
     bcrypt.init_app(app)
-    CORS(app)
 
-    # register Blueprint after configuration is complete
+    #  register Blueprint after configuration is complete
     from app.routes import main as main_blueprint
 
     app.register_blueprint(main_blueprint)

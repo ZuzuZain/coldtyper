@@ -98,6 +98,7 @@ def login():
 
     return jsonify({"message": "invalid username and/or password"}), 401
 
+
 @main.route("/protected")
 @token_required
 def protected():
