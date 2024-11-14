@@ -11,26 +11,28 @@ app.set('trust proxy', 1);  // Enable if your app is behind a proxy like Render
 
 // Middleware
 app.use(cors({
-    origin: `${process.env.FRONTEND_API_URL}`,
+    origin: 'https://www.coldtyper.com', // Update to your frontend's hosted domain
     methods: ['GET', 'POST', 'OPTIONS'],
-    credentials: true, // Allow cookies to be included
+    credentials: true, // Ensure cookies are sent
 }));
+
 app.use(express.json()); // For parsing application/json
 
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
-        proxy: true, // Enable if your app is behind a proxy like Render
         resave: false,
         saveUninitialized: false,
+        proxy: true, // Required for cookies when behind a proxy (Render)
         cookie: {
-            httpOnly: true, // for security
-            secure: true, // true if using HTTPS in production
-            sameSite: 'none', // same-site cookies policy
-            maxAge: 1000 * 60 * 60 * 24,
+            httpOnly: true,
+            secure: true, // Ensure this is true for HTTPS
+            sameSite: 'None', // Required for cross-origin cookies
+            maxAge: 1000 * 60 * 60 * 24, // One day
         },
     })
 );
+
 
 
 // PostgreSQL connection
