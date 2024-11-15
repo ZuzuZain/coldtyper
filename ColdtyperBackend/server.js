@@ -21,14 +21,15 @@ app.use(express.json()); // For parsing application/json
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
+        resave: true,
+        saveUninitialized: true,
         proxy: true, // Required for cookies when behind a proxy (Render)
         cookie: {
             httpOnly: true,
             secure: true, // Ensure this is true for HTTPS
-            sameSite: 'None', // Required for cross-origin cookies
+            sameSite: 'none', // Required for cross-origin cookies
             maxAge: 1000 * 60 * 60 * 24, // One day
+            partitioned: true,
         },
     })
 );
