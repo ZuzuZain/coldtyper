@@ -110,7 +110,7 @@ const MainScreen = () => {
     }
 
     return () => clearInterval(timerInterval);
-  }, [testActive, timeLeft]);
+  }, [testActive, timeLeft, wpm, accuracy]);
 
   // Refresh the page when the user presses Enter for quick restart
   useEffect(() => {
