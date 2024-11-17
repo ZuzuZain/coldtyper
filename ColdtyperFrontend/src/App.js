@@ -38,25 +38,6 @@ function App() {
   res.send('Login successful');
 };
 
-fetch('https://www.coldtyper.com/api/login', {
-  method: 'POST',
-  credentials: 'include', // Ensures cookies are sent and received
-  body: JSON.stringify({ username, password }),
-  headers: { 'Content-Type': 'application/json' },
-})
-.then((response) => {
-  // Log the response headers to see if cookies are set
-  console.log('Response headers:', response.headers.get('Set-Cookie'));
-  return response.json();
-})
-.then((data) => {
-  console.log('Login response data:', data);
-})
-.catch((error) => {
-  console.error('Error:', error);
-});
-
-
 // Navigates to Signup Page on button press
   const handleSignUp = () => {
     navigate('/signup');
