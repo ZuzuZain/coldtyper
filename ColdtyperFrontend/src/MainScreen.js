@@ -55,6 +55,8 @@ const MainScreen = () => {
   // Function to send test results to the backend
   const sendTestResults = async () => {
     try {
+      console.log('Submitting results:', { wpm, accuracy });
+
         const response = await fetch(`${process.env.REACT_APP_API_URL}/api/updateResults`, {
             method: 'POST',
             headers: {
