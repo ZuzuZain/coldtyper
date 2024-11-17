@@ -34,8 +34,6 @@ function App() {
         console.error('Login failed:', error.response ? error.response.data : error);
         alert('Login failed: ' + (error.response ? error.response.data.error : 'Unknown error'));
     }
-    console.log('Setting cookie:', res.getHeader('Set-Cookie'));  // Log the cookie
-  res.send('Login successful');
 };
 
 // Navigates to Signup Page on button press

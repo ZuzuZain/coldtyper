@@ -55,29 +55,42 @@ const MainScreen = () => {
   // Function to send test results to the backend
   const sendTestResults = async () => {
     try {
-      console.log('Submitting results:', { wpm, accuracy });
-
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/updateResults`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include', // Include session credentials
-            body: JSON.stringify({
-                wpm: wpm, // WPM calculated after test
-                accuracy: accuracy // Accuracy calculated after test
-            }),
-        });
-
-        if (response.ok) {
-            console.log('Results submitted successfully');
-        } else {
-            console.error('Failed to submit results');
-        }
+      // Retrieve WPM and accuracy from localStorage
+      const storedWpm = localStorage.getItem('wpm');
+      const storedAccuracy = localStorage.getItem('accuracy');
+  
+      // If the values exist in localStorage, use them
+      if (!storedWpm || !storedAccuracy) {
+        console.error('WPM or accuracy not found in localStorage');
+        return;
+      }
+  
+      // Log the values to verify they're being retrieved correctly
+      console.log('Submitting results:', { wpm: storedWpm, accuracy: storedAccuracy });
+  
+      // Send the results to the backend
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/updateResults`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include session credentials
+        body: JSON.stringify({
+          wpm: storedWpm, // WPM retrieved from localStorage
+          accuracy: storedAccuracy, // Accuracy retrieved from localStorage
+        }),
+      });
+  
+      if (response.ok) {
+        console.log('Results submitted successfully');
+      } else {
+        console.error('Failed to submit results');
+      }
     } catch (error) {
-        console.error('Error submitting results:', error);
+      console.error('Error submitting results:', error);
     }
-};
+  };
+  
 
   //Timing for the test
   useEffect(() => {
@@ -139,12 +152,14 @@ const MainScreen = () => {
   const calculateWpm = () => {
     const wordsPerMinute = (allTypedEntries / 5) / (testDuration / 60); // Adjusted WPM formula
     setWpm(wordsPerMinute);
+    localStorage.setItem('wpm', wpm);
   };
 
   // Calculates the user's accuracy
   const calculateAccuracy = () => {
     const accuracyPercentage = (correctChars / allTypedEntries) * 100; // Adjusted accuracy formula
     setAccuracy(accuracyPercentage.toFixed(2));
+    localStorage.setItem('accuracy', accuracy);
   };
 
   // Function to display the sentence with colors based on user input
