@@ -29,7 +29,6 @@ app.use(
             secure: true, // Ensure this is true for HTTPS
             sameSite: 'none', // Required for cross-origin cookies
             maxAge: 1000 * 60 * 60 * 24, // One day
-            partitioned: true,
             domain: 'coldtyper.com', // Update to your domain
         },
     })
