@@ -104,6 +104,8 @@ const MainScreen = () => {
       setTestActive(false); // Stop the test when the timer hits zero
       calculateWpm();
       calculateAccuracy();
+      localStorage.setItem('wpm', wpm);
+      localStorage.setItem('accuracy', accuracy);
       sendTestResults(); // Send the test results to the backend
     }
 
@@ -152,14 +154,12 @@ const MainScreen = () => {
   const calculateWpm = () => {
     const wordsPerMinute = (allTypedEntries / 5) / (testDuration / 60); // Adjusted WPM formula
     setWpm(wordsPerMinute);
-    localStorage.setItem('wpm', wpm);
   };
 
   // Calculates the user's accuracy
   const calculateAccuracy = () => {
     const accuracyPercentage = (correctChars / allTypedEntries) * 100; // Adjusted accuracy formula
     setAccuracy(accuracyPercentage.toFixed(2));
-    localStorage.setItem('accuracy', accuracy);
   };
 
   // Function to display the sentence with colors based on user input
