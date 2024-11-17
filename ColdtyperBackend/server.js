@@ -11,7 +11,7 @@ app.set('trust proxy', 1);  // Enable if your app is behind a proxy like Render
 
 // Middleware
 app.use(cors({
-    origin: 'https://www.coldtyper.com', // Update to your frontend's hosted domain
+    origin: 'https://coldtyper-1.onrender.com', // Update to your frontend's hosted domain
     methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true, // Ensure cookies are sent
 }));
@@ -21,8 +21,8 @@ app.use(express.json()); // For parsing application/json
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
-        resave: true,
-        saveUninitialized: true,
+        resave: false,
+        saveUninitialized: false,
         proxy: true, // Required for cookies when behind a proxy (Render)
         cookie: {
             httpOnly: true,
