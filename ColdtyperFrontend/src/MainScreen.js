@@ -116,6 +116,8 @@ const MainScreen = () => {
   useEffect(() => {
     const handleEnterPress = (event) => {
         if (event.key === "Enter") {
+            localStorage.removeItem('wpm');
+            localStorage.removeItem('accuracy');
             window.location.reload(); // Refresh the page
         }
     };
@@ -220,6 +222,8 @@ const MainScreen = () => {
   
       if (response.ok) {
         // Redirect to login page on successful logout
+        localStorage.removeItem('wpm');
+        localStorage.removeItem('accuracy');
         navigate('/');
       } else {
         console.error('Logout failed');

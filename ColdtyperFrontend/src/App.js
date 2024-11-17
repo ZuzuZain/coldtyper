@@ -27,6 +27,8 @@ function App() {
         // If login is successful, redirect to main screen
         if (response.status === 200) {
             localStorage.setItem('userId', response.data.user.id); // Store the user ID in local storage
+            localStorage.removeItem('wpm');
+            localStorage.removeItem('accuracy');
             navigate('/main');
         }
     } catch (error) {
