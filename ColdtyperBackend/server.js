@@ -18,6 +18,11 @@ app.use(cors({
 
 app.use(express.json()); // For parsing application/json
 
+app.use((req, res, next) => {
+    console.log('Cookies received:', req.cookies);  // This will log the cookies in every request.
+    next();
+  });
+
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
@@ -33,6 +38,7 @@ app.use(
         },
     })
 );
+  
 
 
 
