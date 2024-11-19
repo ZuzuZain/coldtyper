@@ -1,31 +1,54 @@
-# Flask and Flask extensions
-Flask==3.0.3
-Flask-SQLAlchemy==3.1.1
-Flask-Migrate==4.0.7
-Flask-Cors==5.0.0
-Flask-Bcrypt==1.0.1
-Werkzeug==3.0.4
-
-# database
-SQLAlchemy==2.0.35
-psycopg2-binary==2.9.9
-alembic==1.13.3  # for Flask-Migrate
-
-# security & authentication
-PyJWT==2.9.0
+alembic==1.13.3
+altgraph==0.17.4
 bcrypt==4.2.0
-
-# utils
-python-dotenv==1.0.1
-python-dateutil==2.8.2  
-marshmallow==3.22.0     # serialization/deserialization
-
-# dependencies needed for all of the above packages 
+black==24.2.0
 blinker==1.8.2
 click==8.1.7
+coverage==7.6.4
+flake8==7.0.0
+Flask==3.0.3
+Flask-Bcrypt==1.0.1
+Flask-Cors==5.0.0
+Flask-DebugToolbar==0.14.1
+Flask-Migrate==4.0.7
+Flask-SQLAlchemy==3.1.1
+greenlet==3.1.1
+iniconfig==2.0.0
+isort==5.13.2
 itsdangerous==2.2.0
 Jinja2==3.1.4
+macholib==1.16.3
 Mako==1.3.5
 MarkupSafe==2.1.5
+marshmallow==3.22.0
+mccabe==0.7.0
+msgpack==1.1.0
+mypy-extensions==1.0.0
+numpy==1.26.3
+packaging==24.1
+pandas==2.2.0
+pathspec==0.12.1
+pillow==10.4.0
+platformdirs==4.3.6
+pluggy==1.5.0
+psycopg2-binary==2.9.9
+pyasn1==0.6.1
+pycodestyle==2.11.1
+pyflakes==3.2.0
+pyinstaller==6.10.0
+pyinstaller-hooks-contrib==2024.8
+PyJWT==2.9.0
+pynvim==0.5.0
+PySimpleGUI==5.0.6
+pytest==8.3.3
+pytest-cov==4.1.0
+python-dateutil==2.8.2
+python-dotenv==1.0.1
+pytz==2023.4
+rsa==4.9
+setuptools==75.1.0
+six==1.16.0
+SQLAlchemy==2.0.35
 typing_extensions==4.12.2
-
+tzdata==2023.4
+Werkzeug==3.0.4
