@@ -1,180 +1,105 @@
-// Imports necessary components and libraries for the app
-import React, { useState, useEffect, useRef } from 'react';
-import './MainScreen.css';
-import Header from './Header';
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import Header from "./Header";
 import { useNavigate } from 'react-router-dom';
+import "./MainScreen.css";
 
-const MainScreen = () => {
+export default function MainScreen() {
+  const [state, setState] = useState({
+    text: "",
+    userInput: "",
+    testDuration: 30,
+    timeLeft: null,
+    testActive: false,
+    wpm: 0,
+    accuracy: 0,
+    difficulty: "medium",
+  });
 
-  // Sentence that the user will be typing
-  const sentence = "the quick brown fox jumps over the lazy dog and these are other words that I am typing testing this more apple pear run jump test more this your ghost read red for the boat orange java girl type react ball jump run swing castle jon snow wars adventure galaxy whisper breeze horizon mystery cactus thunder eclipse velvet shadow ripple ember harmony twilight forest crystal melody ocean wander breeze summit cascade meadow sapphire storm labyrinth flicker oasis echo phoenix drizzle comet lunar wildfire dusk voyage infinity starlight shimmer"; // Sample sentence
-
-  const [userInput, setUserInput] = useState(""); // Stores the user input
-  const [currentIndex, setCurrentIndex] = useState(0); // Tracks the position within the sentence
-
-  const [testDuration, setTestDuration] = useState(30); // Test duration; default = 30 seconds
-  const [timeLeft, setTimeLeft] = useState(null); // Time remaining in test
-  const [testActive, setTestActive] = useState(false); // Is the test active?
-  const [countdown, setCountdown] = useState(3); // Countdown before the test starts
-
-  const [wpm, setWpm] = useState(0); // Tracks WPM
-  const [accuracy, setAccuracy] = useState(0); // Tracks accuracy
-  const [correctChars, setCorrectChars] = useState(0); // Tracks the number of correct characters typed
-  const [allTypedEntries, setAllTypedEntries] = useState(0); // Tracks all typed characters (excluding shifts/backspaces)
-
-  const navigate = useNavigate();
   const inputRef = useRef(null);
+  const navigate = useNavigate();
 
 
-  // Function to start the test
-  const startTest = () => {
-
-    setTestActive(false);
-    setUserInput("");
-    setCurrentIndex(0);
-    setCorrectChars(0);
-    setCountdown(3);
-
-    const countdownInterval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev === 1) {
-          clearInterval(countdownInterval);
-          setTestActive(true);
-          setAccuracy(0);
-          setWpm(0);
-          setCorrectChars(0);
-          setAllTypedEntries(0);
-          setTimeLeft(testDuration);
-          inputRef.current.focus();
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  // Function to send test results to the backend
-  const sendTestResults = async () => {
+  const fetchTestText = async () => {
     try {
-      // Retrieve WPM and accuracy from localStorage
-      const storedWpm = localStorage.getItem('wpm');
-      const storedAccuracy = localStorage.getItem('accuracy');
-  
-      // If the values exist in localStorage, use them
-      if (!storedWpm || !storedAccuracy) {
-        console.error('WPM or accuracy not found in localStorage');
-        return;
-      }
-  
-      // Log the values to verify they're being retrieved correctly
-      console.log('Submitting results:', { wpm: storedWpm, accuracy: storedAccuracy });
-  
-      // Send the results to the backend
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/updateResults`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Include session credentials
-        body: JSON.stringify({
-          wpm: storedWpm, // WPM retrieved from localStorage
-          accuracy: storedAccuracy, // Accuracy retrieved from localStorage
-        }),
-      });
-  
-      if (response.ok) {
-        console.log('Results submitted successfully');
-      } else {
-        console.error('Failed to submit results');
-      }
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/generate-text`,
+        {
+          params: { difficulty: state.difficulty, wordCount: 100 },
+        }
+      );
+      setState((prev) => ({ ...prev, text: response.data.text }));
     } catch (error) {
-      console.error('Error submitting results:', error);
+      console.error("Error fetching test text:", error);
+      setState((prev) => ({
+        ...prev,
+        text: "Error loading text. Please try again.",
+      }));
     }
   };
-  
 
-  //Timing for the test
+  useEffect(() => {
+    fetchTestText();
+  }, [state.difficulty]);
+
+  const startTest = () => {
+    setState((prev) => ({
+      ...prev,
+      testActive: true,
+      userInput: "",
+      timeLeft: prev.testDuration,
+      wpm: 0,
+      accuracy: 0,
+    }));
+    fetchTestText();
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 0);
+  };
+
   useEffect(() => {
     let timerInterval;
-
-    if (testActive && timeLeft > 0) {
+    if (state.testActive && state.timeLeft > 0) {
       timerInterval = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1);
+        setState((prev) => ({ ...prev, timeLeft: prev.timeLeft - 1 }));
       }, 1000);
-    } else if (timeLeft === 0 && testActive) {
-      setTestActive(false); // Stop the test when the timer hits zero
-      calculateWpm();
-      calculateAccuracy();
-      sendTestResults(); // Send the test results to the backend
+    } else if (state.timeLeft === 0 && state.testActive) {
+      const words = state.userInput.trim().split(" ").length;
+      const characters = state.userInput.length;
+      const correctCharacters = state.text
+        .slice(0, characters)
+        .split("")
+        .filter((char, index) => char === state.userInput[index]).length;
+      setState((prev) => ({
+        ...prev,
+        testActive: false,
+        wpm: Math.round((words / 5) / (prev.testDuration / 60)),
+        accuracy: Math.round((correctCharacters / characters) * 100),
+      }));
     }
-
     return () => clearInterval(timerInterval);
-  }, [testActive, timeLeft]);
+  }, [state.testActive, state.timeLeft]);
 
-  // Refresh the page when the user presses Enter for quick restart
-  useEffect(() => {
-    const handleEnterPress = (event) => {
-        if (event.key === "Enter") {
-            localStorage.removeItem('wpm');
-            localStorage.removeItem('accuracy');
-            window.location.reload(); // Refresh the page
-        }
-    };
-    window.addEventListener("keydown", handleEnterPress);
-    return () => {
-        window.removeEventListener("keydown", handleEnterPress);
-    };
-  }, []);
-
-  // Function to handle input changes
   const handleInputChange = (e) => {
-    const value = e.target.value;
-    if (testActive && timeLeft > 0) {
-      const lastChar = value.slice(-1); // Get the last character typed
-
-      // Count all valid typed characters, not including backspace and shift
-      if (lastChar !== 'Shift' && lastChar !== 'Backspace') {
-        setAllTypedEntries(allTypedEntries + 1);
-      }
-
-      setUserInput(value);
-      setCurrentIndex(value.length);
-
-      // Count correct characters
-      let correctCharCount = 0;
-      value.split("").forEach((char, index) => {
-        if (char === sentence[index]) {
-          correctCharCount++;
-        }
-      });
-      setCorrectChars(correctCharCount);
+    if (state.testActive) {
+      setState((prev) => ({ ...prev, userInput: e.target.value }));
     }
   };
 
-  // Calculates the WPM with an adjusted formula (Divide by 5 because average word length is 5 characters)
-  const calculateWpm = () => {
-    const wordsPerMinute = (allTypedEntries / 5) / (testDuration / 60); // Adjusted WPM formula
-    setWpm(wordsPerMinute);
-    localStorage.setItem('wpm', wordsPerMinute.toFixed(2)); // Store the WPM in localStorage
-  };
+  const displayText = () => {
+    let absoluteIndex = 0; // Track index across the entire sentence
 
-  // Calculates the user's accuracy
-  const calculateAccuracy = () => {
-    const accuracyPercentage = (correctChars / allTypedEntries) * 100; // Adjusted accuracy formula
-    setAccuracy(accuracyPercentage.toFixed(2));
-    localStorage.setItem('accuracy', accuracyPercentage.toFixed(2)); // Store the accuracy in localStorage
-  };
-
-  // Function to display the sentence with colors based on user input
-  const displaySentence = () => {
-    let absoluteIndex = 0; // Track index across entire sentence
-
-    // Map over words and create spans for each word
-    const wordsArray = sentence.split(" ").map((word, wordIndex) => {
+    // Ensure state.text contains the sentence from the API
+    const wordsArray = state.text.split(" ").map((word, wordIndex) => {
         const wordCharacters = word.split("").map((char, charIndex) => {
             // Determine the color based on correctness
-            let color;
-            if (absoluteIndex < currentIndex) {
-                color = char === userInput[absoluteIndex] ? '#00E6F6' : 'red';
+            let color = "inherit";
+            if (absoluteIndex < state.userInput.length) {
+                color = char === state.userInput[absoluteIndex] ? "#00E6F6" : "red";
             }
 
             const charSpan = (
@@ -182,60 +107,27 @@ const MainScreen = () => {
                     {char}
                 </span>
             );
-            
-            absoluteIndex++; // Increment for each character in word
+
+            absoluteIndex++; // Increment for each character in the word
             return charSpan;
         });
 
-        // Add a single space between words
+        // Add a single space after each word except the last one
         const wordWithSpace = (
-            <span key={`word-${wordIndex}`} style={{ display: 'inline-block', marginRight: '4px' }}>
+            <span key={`word-${wordIndex}`} style={{ display: "inline-block", marginRight: "4px" }}>
                 {wordCharacters}
-                {wordIndex < sentence.split(" ").length - 1 && (
-                    <span>&nbsp;</span> // Add space only if not last word
+                {wordIndex < state.text.split(" ").length - 1 && (
+                    <span>&nbsp;</span> // Add space only if not the last word
                 )}
             </span>
         );
 
-        absoluteIndex++;
+        absoluteIndex++; // Increment for the space between words
         return wordWithSpace;
-  });
+    });
 
-  // Return sentence with wrapping and spacing
-  return (
-      <div style={{ whiteSpace: 'normal', overflowWrap: 'break-word', padding: '15px', fontSize: '25px' }}>
-          {wordsArray}
-      </div>
-  );
+    return <div>{wordsArray}</div>;
 };
-
-// Function to handle logout
-  const handleGoBack = async () => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/logout`, {
-        method: 'POST',
-        credentials: 'include', // Make sure cookies/sessions are included
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      if (response.ok) {
-        // Redirect to login page on successful logout
-        localStorage.removeItem('wpm');
-        localStorage.removeItem('accuracy');
-        navigate('/');
-      } else {
-        console.error('Logout failed');
-      }
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
-  };
-
-  const handleTestDurationChange = (e) => {
-    setTestDuration(Number(e.target.value));
-  };
 
   // Navigate to Leaderboard page
   const handleLeaderboardClick = () => {
@@ -250,13 +142,25 @@ const MainScreen = () => {
     navigate('/main');
   };
 
-  // Returns the HTML for the MainScreen component
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/logout`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (response.ok) window.location.href = "/";
+      else console.error("Logout failed");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
   return (
     <div className="MainScreen">
       <Header />
       <div className="MainScreen-container">
-
-        <nav className="sidebar">
+      <nav className="sidebar">
           
           <button onClick={handleMainClick} className="sidebar-button">
             Main Menu
@@ -270,7 +174,7 @@ const MainScreen = () => {
             User Statistics
           </button>
 
-          <button onClick={handleGoBack} className="sidebar-button">
+          <button onClick={handleLogout} className="sidebar-button">
             Logout
           </button>
           
@@ -278,51 +182,68 @@ const MainScreen = () => {
 
         <div className="MainScreen-body">
           <div className="duration-toggle">
-            <input 
-                type="radio" 
-                id="rad1" 
-                name="rads"
-                value={30}
-                checked={testDuration === 30}
-                onChange={handleTestDurationChange}/>
-            <label htmlFor="rad1">30 Seconds</label>
-            <input 
-                type="radio" 
-                id="rad2" 
-                name="rads"
-                value={60}
-                checked={testDuration === 60}
-                onChange={handleTestDurationChange}/>
-            <label htmlFor="rad2">60 Seconds</label>
+            {[30, 60].map((duration) => (
+              <React.Fragment key={duration}>
+                <input
+                  type="radio"
+                  id={`rad${duration === 30 ? 1 : 2}`}
+                  name="rads"
+                  value={duration}
+                  checked={state.testDuration === duration}
+                  onChange={(e) =>
+                    setState((prev) => ({
+                      ...prev,
+                      testDuration: Number(e.target.value),
+                    }))
+                  }
+                />
+                <label htmlFor={`rad${duration === 30 ? 1 : 2}`}>
+                  {duration} Seconds
+                </label>
+              </React.Fragment>
+            ))}
           </div>
 
-          <button onClick={startTest} className="button-49" style={{ marginBottom: '20px' }}>
+          <div className="difficulty-toggle">
+            <select
+              value={state.difficulty}
+              onChange={(e) =>
+                setState((prev) => ({ ...prev, difficulty: e.target.value }))
+              }
+            >
+              {["easy", "medium", "hard"].map((diff) => (
+                <option key={diff} value={diff}>
+                  {diff.charAt(0).toUpperCase() + diff.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            onClick={startTest}
+            className="button-49"
+            style={{ marginBottom: "20px" }}
+          >
             Start Test
           </button>
 
-          {countdown > 0 && !testActive && <h2>Starting in: {countdown}</h2>}
-          {testActive && <h2>Time Left: {timeLeft}s</h2>}
+          {state.testActive && <h2>Time Left: {state.timeLeft}s</h2>}
 
           <div className="Mainscreen-content">
-            <div className="centered-div" onClick={() => document.getElementById('hidden-input').focus()}>
-              {displaySentence()}
-              <input
-                ref={inputRef}
-                id="hidden-input"
-                type="text"
-                value={userInput}
-                onChange={handleInputChange}
-                autoFocus
-                style={{ opacity: 0, position: 'absolute', left: '-9999px' }}
-              />
-            </div>
+            <div className="centered-div text-container">{displayText()}</div>
+            <input
+              ref={inputRef}
+              type="text"
+              value={state.userInput}
+              onChange={handleInputChange}
+              disabled={!state.testActive}
+              className="hidden-input"
+            />
           </div>
-          <div className='WPM'>WPM: {wpm.toFixed(2)}</div>
-          <div className='Accuracy'>Accuracy: {accuracy}%</div>
+          <div className="WPM">WPM: {state.wpm}</div>
+          <div className="Accuracy">Accuracy: {state.accuracy}%</div>
         </div>
       </div>
     </div>
   );
-};
-
-export default MainScreen;
+}
