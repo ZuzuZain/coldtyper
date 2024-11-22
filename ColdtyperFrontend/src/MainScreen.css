@@ -37,13 +37,15 @@
 
 .Mainscreen-content {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: center; /* Center items horizontally */
+  align-items: center; /* Center items vertically */
   width: 100%;
   height: 50%;
   margin-top: 20px;
   overflow: hidden;
+  gap: 20px; /* Add space between items if needed */
 }
+
 
 .WPM,
 .Accuracy {
@@ -54,7 +56,7 @@
 .centered-div {
   background-color: #2b2826;
   width: 80%;
-  height: 100%;
+  height: auto; /* Adjust height to fit content dynamically */
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -63,11 +65,11 @@
   padding: 20px;
   overflow-y: auto;
   word-break: break-word;
-  word-wrap: normal;
-  white-space: break-spaces;
+  white-space: normal; /* Ensure consistent spacing */
   font-size: 18px;
   line-height: 1.5;
 }
+
 
 .MainScreen-body {
   background-color: #2b2826;
