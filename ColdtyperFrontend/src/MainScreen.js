@@ -228,6 +228,14 @@ useEffect(() => {
     }
   };
 
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setState((prev) => ({
+      ...prev,
+      userInput: value,
+    }));
+  };  
+
   return (
     <div className="MainScreen">
       <Header />
