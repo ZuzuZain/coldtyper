@@ -230,14 +230,21 @@ app.get("/api/generate-text", async (req, res) => {
 });
 
 async function generateText(difficulty, wordCount) {
-  const maxLength = difficulty === "easy" ? 5 : difficulty === "medium" ? 7 : 9;
-  const words = await fetchWords(wordCount * 2); // Fetch extra words to ensure we have enough after filtering
-
-  const filteredWords = words.filter((word) => word.length <= maxLength);
-  const selectedWords = filteredWords.slice(0, wordCount);
-
-  return selectedWords.join(" ");
-}
+    const maxLength = difficulty === "easy" ? 5 : difficulty === "medium" ? 7 : 9;
+  
+    let selectedWords = [];
+    while (selectedWords.length < wordCount) {
+      const words = await fetchWords(wordCount * 2); // Fetch extra words to filter
+      const filteredWords = words.filter((word) => word.length <= maxLength);
+      selectedWords = selectedWords.concat(filteredWords);
+  
+      // Limit to the required number of words
+      selectedWords = selectedWords.slice(0, wordCount);
+    }
+  
+    return selectedWords.join(" ");
+  }
+  
 
 async function fetchWords(count) {
   try {
