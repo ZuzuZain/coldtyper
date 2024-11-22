@@ -8,12 +8,14 @@ const axios = require("axios");
 const app = express();
 const port = 5000; // This is the port of the local backend server
 
+app.set("trust proxy", 1); // Trust first proxy
+
 require("dotenv").config({ path: "../.env" });
 
 // Middleware
 app.use(
   cors({
-    origin: process.env.DB_URL,
+    origin: 'https://coldtyper-1.onrender.com',
     methods: ["GET", "POST", "OPTIONS"],
     credentials: true, // Allow cookies to be included
   })
@@ -30,7 +32,7 @@ app.use(
       secure: true,
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24,
-      sameSite: "none",
+      sameSite: 'none',
       domain: 'coldtyper.com',
     },
   })
