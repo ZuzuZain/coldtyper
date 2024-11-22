@@ -76,7 +76,7 @@ useEffect(() => {
       .split("")
       .filter((char, index) => char === state.userInput[index]).length;
 
-    const wpm = Math.round(((words / 5) / prev.testDuration) * 60);
+    const wpm = Math.round(((words / 5) / state.testDuration) * 60);
     const accuracy = Math.round((correctCharacters / characters) * 100);
 
     // Store WPM and accuracy in localStorage
