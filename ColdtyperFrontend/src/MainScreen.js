@@ -61,34 +61,42 @@ export default function MainScreen() {
     }, 0);
   };
 
-  useEffect(() => {
-    let timerInterval;
-    if (state.testActive && state.timeLeft > 0) {
-      timerInterval = setInterval(() => {
-        setState((prev) => ({ ...prev, timeLeft: prev.timeLeft - 1 }));
-      }, 1000);
-    } else if (state.timeLeft === 0 && state.testActive) {
-      const words = state.userInput.trim().split(" ").length;
-      const characters = state.userInput.length;
-      const correctCharacters = state.text
-        .slice(0, characters)
-        .split("")
-        .filter((char, index) => char === state.userInput[index]).length;
-      setState((prev) => ({
-        ...prev,
-        testActive: false,
-        wpm: Math.round((words / 5) / (prev.testDuration / 60)),
-        accuracy: Math.round((correctCharacters / characters) * 100),
-      }));
-    }
-    return () => clearInterval(timerInterval);
-  }, [state.testActive, state.timeLeft]);
+  // Inside the useEffect where WPM and accuracy are calculated
+useEffect(() => {
+  let timerInterval;
+  if (state.testActive && state.timeLeft > 0) {
+    timerInterval = setInterval(() => {
+      setState((prev) => ({ ...prev, timeLeft: prev.timeLeft - 1 }));
+    }, 1000);
+  } else if (state.timeLeft === 0 && state.testActive) {
+    const words = state.userInput.trim().split(" ").length;
+    const characters = state.userInput.length;
+    const correctCharacters = state.text
+      .slice(0, characters)
+      .split("")
+      .filter((char, index) => char === state.userInput[index]).length;
 
-  const handleInputChange = (e) => {
-    if (state.testActive) {
-      setState((prev) => ({ ...prev, userInput: e.target.value }));
-    }
-  };
+    const wpm = Math.round((words / 5) / (state.testDuration / 60));
+    const accuracy = Math.round((correctCharacters / characters) * 100);
+
+    // Store WPM and accuracy in localStorage
+    localStorage.setItem("wpm", wpm);
+    localStorage.setItem("accuracy", accuracy);
+
+    setState((prev) => ({
+      ...prev,
+      testActive: false,
+      wpm,
+      accuracy,
+    }));
+
+    // Save results to the database
+    sendTestResults();
+  }
+  return () => clearInterval(timerInterval);
+}, [state.testActive, state.timeLeft]);
+
+  
 
   const displayText = () => {
     let absoluteIndex = 0; // Track index across the entire sentence
@@ -129,6 +137,61 @@ export default function MainScreen() {
     return <div>{wordsArray}</div>;
 };
 
+  // Function to send test results to the backend
+  const sendTestResults = async () => {
+    try {
+      // Retrieve WPM and accuracy from localStorage
+      const storedWpm = localStorage.getItem('wpm');
+      const storedAccuracy = localStorage.getItem('accuracy');
+
+      // If the values exist in localStorage, use them
+      if (!storedWpm || !storedAccuracy) {
+        console.error('WPM or accuracy not found in localStorage');
+        return;
+      }
+
+      // Log the values to verify they're being retrieved correctly
+      console.log('Submitting results:', { wpm: storedWpm, accuracy: storedAccuracy });
+
+      // Send the results to the backend
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/updateResults`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include session credentials
+        body: JSON.stringify({
+          wpm: storedWpm, // WPM retrieved from localStorage
+          accuracy: storedAccuracy, // Accuracy retrieved from localStorage
+        }, 
+      { withCredentials: true}),
+      });
+
+      if (response.ok) {
+        console.log('Results submitted successfully');
+      } else {
+        console.error('Failed to submit results');
+      }
+    } catch (error) {
+      console.error('Error submitting results:', error);
+    }
+  };
+
+    // Refresh the page when the user presses Enter for quick restart
+    useEffect(() => {
+      const handleEnterPress = (event) => {
+          if (event.key === "Enter") {
+              localStorage.removeItem('wpm');
+              localStorage.removeItem('accuracy');
+              window.location.reload(); // Refresh the page
+          }
+      };
+      window.addEventListener("keydown", handleEnterPress);
+      return () => {
+          window.removeEventListener("keydown", handleEnterPress);
+      };
+    }, []);
+
   // Navigate to Leaderboard page
   const handleLeaderboardClick = () => {
     navigate('/leaderboard'); 
@@ -145,14 +208,23 @@ export default function MainScreen() {
   const handleLogout = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/logout`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        credentials: 'include', // Make sure cookies/sessions are included
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
-      if (response.ok) window.location.href = "/";
-      else console.error("Logout failed");
+
+      if (response.ok) {
+        // Redirect to login page on successful logout
+        localStorage.removeItem('wpm');
+        localStorage.removeItem('accuracy');
+        navigate('/');
+      } else {
+        console.error('Logout failed');
+      }
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.error('Error during logout:', error);
     }
   };
 
