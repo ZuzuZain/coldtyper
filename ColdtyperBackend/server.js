@@ -15,7 +15,7 @@ require("dotenv").config({ path: "../.env" });
 // Middleware
 app.use(
   cors({
-    origin: 'https://coldtyper-1.onrender.com',
+    origin: 'https://frontend.coldtyper.com',
     methods: ["GET", "POST", "OPTIONS"],
     credentials: true, // Allow cookies to be included
   })
