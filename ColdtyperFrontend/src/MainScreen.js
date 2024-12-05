@@ -71,13 +71,19 @@ useEffect(() => {
   } else if (state.timeLeft === 0 && state.testActive) {
     const words = state.userInput.trim().split(" ").length;
     const characters = state.userInput.length;
-    const correctCharacters = state.text
-      .slice(0, characters)
-      .split("")
-      .filter((char, index) => char === state.userInput[index]).length;
 
-    const wpm = Math.round((words / state.testDuration) * 60);
-    const accuracy = Math.round((correctCharacters / characters) * 100);
+    // Avoid division by zero if userInput is empty
+    const correctCharacters = characters > 0
+      ? state.text
+          .slice(0, characters)
+          .split("")
+          .filter((char, index) => char === state.userInput[index]).length
+      : 0;
+
+    const wpm = ((words / state.testDuration) * 60).toFixed(2);
+    const accuracy = characters > 0
+      ? ((correctCharacters / characters) * 100).toFixed(2)
+      : 0; // Set accuracy to 0 if no characters were typed
 
     // Store WPM and accuracy in localStorage
     localStorage.setItem("wpm", wpm);
