@@ -5,6 +5,8 @@ import axios from "axios";
 import Header from "./Header";
 import { useNavigate } from 'react-router-dom';
 import "./MainScreen.css";
+import { useTheme } from './contexts/ThemeContext.tsx';
+import './theme.css';
 
 export default function MainScreen() {
   const [state, setState] = useState({
@@ -21,6 +23,7 @@ export default function MainScreen() {
   const inputRef = useRef(null);
   const navigate = useNavigate();
 
+  const { theme, toggleTheme } = useTheme();
 
   const fetchTestText = async () => {
     try {
@@ -61,57 +64,48 @@ export default function MainScreen() {
     }, 0);
   };
 
-  // Inside the useEffect where WPM and accuracy are calculated
-useEffect(() => {
-  let timerInterval;
-  if (state.testActive && state.timeLeft > 0) {
-    timerInterval = setInterval(() => {
-      setState((prev) => ({ ...prev, timeLeft: prev.timeLeft - 1 }));
-    }, 1000);
-  } else if (state.timeLeft === 0 && state.testActive) {
-    const words = state.userInput.trim().split(" ").length;
-    const characters = state.userInput.length;
+  useEffect(() => {
+    let timerInterval;
+    if (state.testActive && state.timeLeft > 0) {
+      timerInterval = setInterval(() => {
+        setState((prev) => ({ ...prev, timeLeft: prev.timeLeft - 1 }));
+      }, 1000);
+    } else if (state.timeLeft === 0 && state.testActive) {
+      const words = state.userInput.trim().split(" ").length;
+      const characters = state.userInput.length;
 
-    // Avoid division by zero if userInput is empty
-    const correctCharacters = characters > 0
-      ? state.text
-          .slice(0, characters)
-          .split("")
-          .filter((char, index) => char === state.userInput[index]).length
-      : 0;
+      const correctCharacters = characters > 0
+        ? state.text
+            .slice(0, characters)
+            .split("")
+            .filter((char, index) => char === state.userInput[index]).length
+        : 0;
 
-    const wpm = ((words / state.testDuration) * 60).toFixed(2);
-    const accuracy = characters > 0
-      ? ((correctCharacters / characters) * 100).toFixed(2)
-      : 0; // Set accuracy to 0 if no characters were typed
+      const wpm = ((words / state.testDuration) * 60).toFixed(2);
+      const accuracy = characters > 0
+        ? ((correctCharacters / characters) * 100).toFixed(2)
+        : 0;
 
-    // Store WPM and accuracy in localStorage
-    localStorage.setItem("wpm", wpm);
-    localStorage.setItem("accuracy", accuracy);
+      localStorage.setItem("wpm", wpm);
+      localStorage.setItem("accuracy", accuracy);
 
-    setState((prev) => ({
-      ...prev,
-      testActive: false,
-      wpm,
-      accuracy,
-    }));
+      setState((prev) => ({
+        ...prev,
+        testActive: false,
+        wpm,
+        accuracy,
+      }));
 
-    // Save results to the database
-    sendTestResults();
-  }
-  return () => clearInterval(timerInterval);
-}, [state.testActive, state.timeLeft]);
-
-  
+      sendTestResults();
+    }
+    return () => clearInterval(timerInterval);
+  }, [state.testActive, state.timeLeft]);
 
   const displayText = () => {
-    let absoluteIndex = 0; // Track index across the entire sentence
-
-    // Ensure state.text contains the sentence from the API
+    let absoluteIndex = 0;
     const wordsArray = state.text.split(" ").map((word, wordIndex) => {
         const wordCharacters = word.split("").map((char, charIndex) => {
-            // Determine the color based on correctness
-            let color = "inherit";
+            let color = "var(--generated-text-color)";
             if (absoluteIndex < state.userInput.length) {
                 color = char === state.userInput[absoluteIndex] ? "#00E6F6" : "red";
             }
@@ -122,55 +116,48 @@ useEffect(() => {
                 </span>
             );
 
-            absoluteIndex++; // Increment for each character in the word
+            absoluteIndex++;
             return charSpan;
         });
 
-        // Add a single space after each word except the last one
         const wordWithSpace = (
             <span key={`word-${wordIndex}`} style={{ display: "inline-block", marginRight: "4px" }}>
                 {wordCharacters}
                 {wordIndex < state.text.split(" ").length - 1 && (
-                    <span>&nbsp;</span> // Add space only if not the last word
+                    <span style={{ color: "var(--generated-text-color)" }}>&nbsp;</span>
                 )}
             </span>
         );
 
-        absoluteIndex++; // Increment for the space between words
+        absoluteIndex++;
         return wordWithSpace;
     });
 
-    return <div>{wordsArray}</div>;
-};
+    return <div style={{ color: "var(--generated-text-color)" }}>{wordsArray}</div>;
+  };
 
-  // Function to send test results to the backend
   const sendTestResults = async () => {
     try {
-      // Retrieve WPM and accuracy from localStorage
       const storedWpm = localStorage.getItem('wpm');
       const storedAccuracy = localStorage.getItem('accuracy');
 
-      // If the values exist in localStorage, use them
       if (!storedWpm || !storedAccuracy) {
         console.error('WPM or accuracy not found in localStorage');
         return;
       }
 
-      // Log the values to verify they're being retrieved correctly
       console.log('Submitting results:', { wpm: storedWpm, accuracy: storedAccuracy });
 
-      // Send the results to the backend
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/updateResults`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Include session credentials
+        credentials: 'include',
         body: JSON.stringify({
-          wpm: storedWpm, // WPM retrieved from localStorage
-          accuracy: storedAccuracy, // Accuracy retrieved from localStorage
-        }, 
-      { withCredentials: true}),
+          wpm: storedWpm,
+          accuracy: storedAccuracy,
+        }),
       });
 
       if (response.ok) {
@@ -183,22 +170,20 @@ useEffect(() => {
     }
   };
 
-    // Refresh the page when the user presses Enter for quick restart
-    useEffect(() => {
-      const handleEnterPress = (event) => {
-          if (event.key === "Enter") {
-              localStorage.removeItem('wpm');
-              localStorage.removeItem('accuracy');
-              window.location.reload(); // Refresh the page
-          }
-      };
-      window.addEventListener("keydown", handleEnterPress);
-      return () => {
-          window.removeEventListener("keydown", handleEnterPress);
-      };
-    }, []);
+  useEffect(() => {
+    const handleEnterPress = (event) => {
+        if (event.key === "Enter") {
+            localStorage.removeItem('wpm');
+            localStorage.removeItem('accuracy');
+            window.location.reload();
+        }
+    };
+    window.addEventListener("keydown", handleEnterPress);
+    return () => {
+        window.removeEventListener("keydown", handleEnterPress);
+    };
+  }, []);
 
-  // Navigate to Leaderboard page
   const handleLeaderboardClick = () => {
     navigate('/leaderboard'); 
   };
@@ -215,14 +200,13 @@ useEffect(() => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/logout`, {
         method: 'POST',
-        credentials: 'include', // Make sure cookies/sessions are included
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
       if (response.ok) {
-        // Redirect to login page on successful logout
         localStorage.removeItem('wpm');
         localStorage.removeItem('accuracy');
         navigate('/');
@@ -243,27 +227,25 @@ useEffect(() => {
   };  
 
   return (
-    <div className="MainScreen">
+    <div data-theme={theme} className="MainScreen">
       <Header />
       <div className="MainScreen-container">
-      <nav className="sidebar">
-          
+        <nav className="sidebar">
           <button onClick={handleMainClick} className="sidebar-button">
             Main Menu
           </button>
-
           <button onClick={handleLeaderboardClick} className="sidebar-button">
             Leaderboard
           </button>
-
           <button onClick={handleStatisticsClick} className="sidebar-button">
             User Statistics
           </button>
-
+          <button onClick={toggleTheme} className="sidebar-button">
+            {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+          </button>
           <button onClick={handleLogout} className="sidebar-button">
             Logout
           </button>
-          
         </nav>
 
         <div className="MainScreen-body">
@@ -333,3 +315,4 @@ useEffect(() => {
     </div>
   );
 }
+

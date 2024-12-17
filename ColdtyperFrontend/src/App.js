@@ -7,9 +7,11 @@ import Header from './Header';
 import SignUp from './SignUp';
 import Statistics from './Statistics';
 import Leaderboard from './Leaderboard';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext.tsx';
 
 function App() {
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   // Handles user login functionality
   const handleLogin = async (event) => {
@@ -36,34 +38,28 @@ function App() {
         console.error('Login failed:', error.response ? error.response.data : error);
         alert('Login failed: ' + (error.response ? error.response.data.error : 'Unknown error'));
     }
-};
+  };
 
-// Navigates to Signup Page on button press
+  // Navigates to Signup Page on button press
   const handleSignUp = () => {
     navigate('/signup');
   };
 
-// Returns the HTML for the App page
+  // Returns the HTML for the App page
   return (
-    <div className="App">
-
+    <div data-theme={theme} className="App">
       <Header />
-
       <div className="App-body">
-
         <div className="App-description">
           <h1>What is Coldtyper?</h1>
           <div className="card">
             <div className="inner-card">Coldtyper is a typing test app that allows users to test their typing speed and accuracy. Once a test begins, the app will keep track of user's time, WPM, and accuracy. Once the test is over, users can view their results.</div>
-            
           </div>
           <div className="card">
-            <div className="inner-card">Create a Coldtyper account to track your typing progress over time. View statistics and grpahs that show how your typing has improved from test to test.</div>
-        
+            <div className="inner-card">Create a Coldtyper account to track your typing progress over time. View statistics and graphs that show how your typing has improved from test to test.</div>
           </div>
           <div className="card">
             <div className="inner-card">Want to know how your WPM stacks up to your friends? View the global leaderboard to view the ranking of the fastest Coldtyper users.</div>
-            
           </div>
         </div>
 
@@ -88,7 +84,6 @@ function App() {
             <h1>New User?</h1>
             <button type="button" className="button-49" onClick={handleSignUp}>Sign Up</button>
           </div>
-
         </div>
       </div>
     </div>
@@ -97,15 +92,18 @@ function App() {
 
 // Router wrapper to handle navigation
 const AppWrapper = () => (
-  <Router>
-    <Routes>
-      <Route path="/" element={<App />} /> {/* App */}
-      <Route path="/main" element={<MainScreen />} /> {/* MainScreen */}
-      <Route path="/signup" element={<SignUp />} /> {/* SignUp */}
-      <Route path="/statistics" element={<Statistics />} /> {/* Statistics */}
-      <Route path="/leaderboard" element={<Leaderboard />} /> {/* Leaderboard */}
-    </Routes>
-  </Router>
+  <ThemeProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<App />} />
+        <Route path="/main" element={<MainScreen />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/statistics" element={<Statistics />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
+      </Routes>
+    </Router>
+  </ThemeProvider>
 );
 
 export default AppWrapper;
+

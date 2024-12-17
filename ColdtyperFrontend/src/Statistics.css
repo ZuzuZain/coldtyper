@@ -1,38 +1,90 @@
 * {
-    font-family: 'Courier New', Courier, monospace;
-    box-sizing: border-box;
-  }
+  font-family: 'Courier New', Courier, monospace;
+  box-sizing: border-box;
+}
 
 .statistics-container {
-    background-color: #2B2826; 
-  }
+  background-color: var(--background-color);
+  min-height: 100vh;
+  color: var(--text-color);
+}
+
+.statistics-layout {
+  display: flex;
+  height: calc(100vh - 15vh); /* Adjust for header height */
+}
+
+.sidebar {
+  width: 15vw;
+  background-color: var(--sidebar-background);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  box-shadow: 2px 0 5px var(--box-shadow-color);
+}
+
+.sidebar-button {
+  color: var(--sidebar-text);
+  background-color: var(--button-bg);
+  border: 1px solid var(--card-border);
+  padding: 10px;
+  margin: 10px 0;
+  cursor: pointer;
+  width: 100%;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-button:hover {
+  background-color: var(--button-hover);
+}
+
+.statistics-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+.statistics-content h1,
+.statistics-content h2 {
+  color: var(--text-color);
+  background-color: var(--background-color);
+  margin-bottom: 1rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  margin: 10px 0;
+  border-radius: 8px;
+  background-color: var(--card-background);
+  border: 1px solid var(--card-border);
+  width: 300px;
+  box-shadow: 0 2px 4px var(--box-shadow-color);
   
-  .statistics-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    border-radius: 4px;
-    text-align: left;
-  }
-  
-  .stat label {
-    display: block;
-    font-weight: bold;
-    color: white;
-  }
-  
-  .stat span {
-    display: block;
-    font-size: 1.2em;
-    margin-top: 5px;
-    color: white;
-  }
+}
+
+.stat label {
+  display: block;
+  font-weight: bold;
+  color: var(--stat-text-color);
+  background-color: var(--background-color);
+  margin-bottom: 5px;
+}
+
+.stat span {
+  display: block;
+  font-size: 1.5em;
+  color: var(--stat-text-color);
+  background-color: var(--background-color);
+}
+

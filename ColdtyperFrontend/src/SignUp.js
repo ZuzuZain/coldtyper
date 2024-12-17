@@ -1,9 +1,13 @@
+import React from 'react';
 import Header from './Header';
 import './SignUp.css';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from './contexts/ThemeContext.tsx';
+import './theme.css';
 
 function SignUp() {
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   // Function to handle user signup
   const handleSubmit = async (event) => {
@@ -38,37 +42,39 @@ function SignUp() {
       alert('Error creating account');
     }
   };
-  
 
   return (
-    <div className="signup-container">
-    <Header />
-      <h1>Create an Account</h1>
-      <form onSubmit={handleSubmit} className="signup-form">
-        <div className="form-group">
-          <label htmlFor="firstName">First Name:</label>
-          <input type="text" id="firstName" name="firstName" required />
-        </div>
-        <div className="form-group">
-          <label htmlFor="lastName">Last Name:</label>
-          <input type="text" id="lastName" name="lastName" required />
-        </div>
-        <div className="form-group">
-          <label htmlFor="username">Username:</label>
-          <input type="text" id="username" name="username" required />
-        </div>
-        <div className="form-group">
-          <label htmlFor="email">Email:</label>
-          <input type="email" id="email" name="email" required />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password:</label>
-          <input type="password" id="password" name="password" required />
-        </div>
-        <button type="submit" className="button-49">Sign Up</button>
-      </form>
+    <div data-theme={theme} className="signup-container">
+      <Header />
+      <div className="signup-content">
+        <h1>Create an Account</h1>
+        <form onSubmit={handleSubmit} className="signup-form">
+          <div className="form-group">
+            <label htmlFor="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstName" required />
+          </div>
+          <div className="form-group">
+            <label htmlFor="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName" required />
+          </div>
+          <div className="form-group">
+            <label htmlFor="username">Username:</label>
+            <input type="text" id="username" name="username" required />
+          </div>
+          <div className="form-group">
+            <label htmlFor="email">Email:</label>
+            <input type="email" id="email" name="email" required />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Password:</label>
+            <input type="password" id="password" name="password" required />
+          </div>
+          <button type="submit" className="button-49">Sign Up</button>
+        </form>
+      </div>
     </div>
   );
 }
 
 export default SignUp;
+
